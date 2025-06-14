@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGov - Administrative Language Transition</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        body {
+            opacity: 0;
+            animation: fadeIn 1.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="#hero" class="nav-link">Home</a></li>
+                    <li><a href="about.html" class="nav-link">About Us</a></li>
+                    <li><a href="people.html" class="nav-link">People</a></li>
+                    <li><a href="services.html" class="nav-link">Services</a></li>
+                    <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="hero" id="hero">
+            <div class="hero-video-container">
+                <video class="hero-video" autoplay muted loop preload="auto">
+                    <source src="Home1.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </section>
+        <section class="cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2 class="cta-title"></h2>
+                    <p class="cta-subtitle"></p>
+                    <button class="btn btn-primary btn-large"></button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" id="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <div class="support-container">
+                        <a href="#" class="footer-link support-link">Support</a>
+                        <div class="tooltip">Click here!</div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="welcome-modal">
+        <button class="close-modal">&times;</button>
+        <div class="welcome-message">
+            <strong>EN: Welcome to LangGov</strong> - <em>A support platform for Algeria's administrative transition from French to English</em>
+            <div class="welcome-message-subtitle">
+                Empowering the linguistic future of Algeria's public sector
+            </div>
+        </div>
+        <div class="welcome-message-fr">
+            <strong>FR: Bienvenue sur LangGov</strong> - <em>Plateforme d'accompagnement pour la transition administrative du français vers l'anglais en Algérie</em>
+            <div class="welcome-message-fr-subtitle">
+                Assurer l'avenir linguistique du secteur public algérien
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay"></div>
+
+    <script>
+        // Clear any potential live page redirects on main page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clear session storage that might cause unwanted redirects
+            sessionStorage.removeItem('redirectToLive');
+            sessionStorage.removeItem('currentLiveId');
+            sessionStorage.removeItem('isInLiveSession');
+            
+            // Clear any live-related localStorage except language preference
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('live') && key !== 'preferredLanguage') {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

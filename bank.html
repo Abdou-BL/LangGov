@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminology Bank - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        .bank-container {
+            max-width: 1200px;
+            margin: 20px auto 60px;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .bank-title {
+            text-align: center;
+            color: var(--text-dark);
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            position: relative;
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border: 3px solid var(--primary-green);
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #f2fbe1, #e1f8ba);
+            width: 100%;
+            font-weight: 800;
+        }
+
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .bank-column {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(to right, #f2fbe1, #e1f8ba);
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bank-column:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .column-icon {
+            font-size: 3rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        .column-title {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .content-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .content-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .content-item:hover {
+            transform: translateY(-3px);
+            background: var(--light-green);
+        }
+
+        .content-item i {
+            color: var(--primary-green);
+        }
+
+        .download-option {
+            background: var(--primary-green);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .download-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .bank-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .bank-column {
+                min-height: auto;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 90%;
+            width: 500px;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        .modal-content {
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-green);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li><a href="main.html#about" class="nav-link">About Us</a></li>
+                    <li><a href="main.html#services" class="nav-link">Services</a></li>
+                    <li><a href="main.html#footer" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="bank-container">
+            <h1 class="bank-title">
+                <span class="english">Terminology Bank</span>
+                <span class="french">Banque de Terminologie</span>
+            </h1>
+            
+            <div class="bank-grid">
+                <div class="bank-column">
+                    <i class="fas fa-book-open column-icon"></i>
+                    <h2 class="column-title">
+                        <span class="english">Explore Key Language Terms</span>
+                        <span class="french">Explorer les Termes Clés</span>
+                    </h2>
+                    <ul class="content-list">
+                        <li class="content-item">
+                            <i class="fas fa-check"></i>
+                            <span class="english">Administrative Terminology</span>
+                            <span class="french">Terminologie Administrative</span>
+                        </li>
+                        <li class="content-item">
+                            <i class="fas fa-check"></i>
+                            <span class="english">Legal Terms</span>
+                            <span class="french">Termes Juridiques</span>
+                        </li>
+                        <li class="content-item">
+                            <i class="fas fa-check"></i>
+                            <span class="english">Technical Vocabulary</span>
+                            <span class="french">Vocabulaire Technique</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bank-column">
+                    <i class="fas fa-lightbulb column-icon"></i>
+                    <h2 class="column-title">
+                        <span class="english">Learn & Apply</span>
+                        <span class="french">Apprendre & Appliquer</span>
+                    </h2>
+                    <ul class="content-list">
+                        <li class="content-item">
+                            <i class="fas fa-search"></i>
+                            <span class="english">Search the Glossary</span>
+                            <span class="french">Rechercher dans le Glossaire</span>
+                        </li>
+                        <li class="content-item">
+                            <i class="fas fa-sort-alpha-down"></i>
+                            <span class="english">Browse Terms A–Z</span>
+                            <span class="french">Parcourir les Termes A–Z</span>
+                        </li>
+                        <li class="content-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span class="english">Quiz Yourself</span>
+                            <span class="french">Testez vos Connaissances</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bank-column">
+                    <i class="fas fa-download column-icon"></i>
+                    <h2 class="column-title">
+                        <span class="english">Take it with you</span>
+                        <span class="french">Emportez-le avec vous</span>
+                    </h2>
+                    <ul class="content-list">
+                        <li class="content-item">
+                            <i class="fas fa-file-pdf"></i>
+                            <span class="english">Download PDF Guide</span>
+                            <span class="french">Télécharger le Guide PDF</span>
+                        </li>
+                        <li class="content-item">
+                            <i class="fas fa-print"></i>
+                            <span class="english">Print Version</span>
+                            <span class="french">Version Imprimable</span>
+                        </li>
+                    </ul>
+                    <div class="download-option">
+                        <i class="fas fa-cloud-download-alt"></i>
+                        <span class="english">Download Complete Glossary</span>
+                        <span class="french">Télécharger le Glossaire Complet</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal">
+        <button class="close-modal">&times;</button>
+        <h3 class="modal-title">
+            <span class="english">Feature Coming Soon</span>
+            <span class="french">Fonctionnalité à Venir</span>
+        </h3>
+        <div class="modal-content">
+            <span class="english">This feature will be available in the next update.</span>
+            <span class="french">Cette fonctionnalité sera disponible dans la prochaine mise à jour.</span>
+        </div>
+    </div>
+    <div class="overlay"></div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="bank.js"></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to LangGov</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(45, 90, 61, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 80% 80%, rgba(45, 90, 61, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 50% 50%, rgba(45, 90, 61, 0.05) 0%, transparent 30%),
+                linear-gradient(45deg, transparent 48%, rgba(45, 90, 61, 0.02) 49%, rgba(45, 90, 61, 0.02) 51%, transparent 52%);
+            background-size: 300px 300px, 300px 300px, 500px 500px, 20px 20px;
+            animation: patternMove 30s linear infinite;
+        }
+
+        .logo-container {
+            position: relative;
+            z-index: 2;
+            animation: fadeInAndScale 2s ease-out forwards;
+            opacity: 0;
+            transform: scale(0.5);
+            margin-top: 80px; /* Add space for the fixed menu */
+        }
+
+        .logo {
+            width: 300px;
+            height: auto;
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5));
+            position: relative;
+            z-index: 2;
+        }
+
+        .lines {
+            position: absolute;
+            inset: -50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: rotate 8s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            transform-origin: center;
+        }
+
+        .lines::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+        }
+
+        .lines:nth-child(1) {
+            transform: rotate(0deg);
+            animation: rotate1 8s linear infinite;
+        }
+
+        .lines:nth-child(2) {
+            transform: rotate(60deg);
+            animation: rotate2 8s linear infinite;
+            border: 4px solid rgba(255, 0, 0, 0.4);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .lines:nth-child(3) {
+            transform: rotate(120deg);
+            animation: rotate3 8s linear infinite;
+            border: 4px solid rgba(45, 90, 61, 0.4);
+            box-shadow: 0 0 20px rgba(45, 90, 61, 0.3);
+        }
+
+        @keyframes fadeInAndScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotate1 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rotate2 {
+            0% { transform: rotate(60deg); }
+            100% { transform: rotate(420deg); }
+        }
+
+        @keyframes rotate3 {
+            0% { transform: rotate(120deg); }
+            100% { transform: rotate(480deg); }
+        }
+
+        @keyframes patternMove {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 500px 500px;
+            }
+        }
+
+        body.fade-out {
+            animation: fadeOut 1.5s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Hide profile icon on live page */
+        .header-icons {
+            display: none;
+        }
+
+        /* Hide footer on live page */
+        .footer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-pattern"></div>
+    <div class="logo-container">
+        <div class="lines"></div>
+        <div class="lines"></div>
+        <div class="lines"></div>
+        <img src="Logo.png" alt="LangGov Logo" class="logo">
+    </div>
+
+    <script>
+        // Clear any potential navigation state
+        if (sessionStorage.getItem('redirectToLive')) {
+            sessionStorage.removeItem('redirectToLive');
+        }
+        
+        // Check if this is the first visit to prevent showing welcome multiple times
+        const hasShownWelcome = sessionStorage.getItem('hasShownWelcome');
+        
+        if (hasShownWelcome) {
+            // If welcome was already shown, redirect immediately to main
+            window.location.href = 'main.html';
+        } else {
+            // First time showing welcome, mark it as shown and proceed with normal flow
+            sessionStorage.setItem('hasShownWelcome', 'true');
+            
+            setTimeout(() => {
+                document.body.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 1500); // Wait for fade out to complete
+                
+            }, 4000); // Show welcome for 4 seconds before starting transition
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li><a href="about.html" class="nav-link">About Us</a></li>
+                    <li><a href="people.html" class="nav-link">People</a></li>
+                    <li><a href="main.html#services" class="nav-link">Services</a></li>
+                    <li><a href="main.html#footer" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="about" id="about">
+            <div class="container">
+                <div class="about-header">
+                    <img src="Logo.png" alt="LangGov Logo" class="about-logo">
+                    <h2 class="about-title">A Linguistic platform for Transitioning from French to English in Algerian administration</h2>
+                </div>
+                <div class="about-content">
+                    <div class="about-column">
+                        <div class="flag-header">
+                            <img src="uk_flag.png" alt="English" class="flag-icon">
+                            <span>English</span>
+                        </div>
+                        <p class="about-text">
+                            Algerian administrations are called upon to undergo a linguistic transition from French to English.
+                        </p>
+                        <p class="about-text">
+                            This change, key to modernization, is slowed down by a lack of tools, training, and support.
+                        </p>
+                        <div class="about-section">
+                            <h3>Mission:</h3>
+                            <p>Our goal is to provide a comprehensive platform along with tailored training programs, adapted to the specific needs of each public institution regardless of its size or function to ensure an effective, sustainable, and well-structured transition to English.</p>
+                        </div>
+                        <div class="about-section">
+                            <h3>Vision:</h3>
+                            <p>Make LangGov a key player to Support the modernization of Algerian administration through a smooth shift to English, promoting an open and globally connected administrative culture</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-column">
+                        <div class="flag-header">
+                            <img src="fr_flag.png" alt="Français" class="flag-icon">
+                            <span>Français</span>
+                        </div>
+                        <p class="about-text">
+                            Les administrations algériennes sont appelées à effectuer une transition linguistique du français vers l'anglais.
+                        </p>
+                        <p class="about-text">
+                            Ce changement, clé de la modernisation, est freiné par le manque d'outils, de ressources, de formations et d'accompagnement.
+                        </p>
+                        <div class="about-section">
+                            <h3>Mission :</h3>
+                            <p>Notre objectif est de proposer une plateforme complète et des formations sur mesure, adaptées aux besoins spécifiques de chaque institution publique - quelle que soit sa taille ou sa fonction afin de réussir une transition vers l'anglais de manière efficace, durable et structurée.</p>
+                        </div>
+                        <div class="about-section">
+                            <h3>Vision :</h3>
+                            <p>Accompagner la modernisation de l'administration algérienne par une transition maîtrisée vers l'anglais, pour une culture administrative ouverte et connectée au monde</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="contact.html" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

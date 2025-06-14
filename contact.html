@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        .contact-container {
+            max-width: 800px;
+            margin: 40px auto 60px;
+            padding: 40px;
+            background: linear-gradient(to right, #f2fbe1, #e1f8ba);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 0.6s ease forwards;
+            border: 3px solid var(--primary-green);
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .contact-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .contact-title {
+            color: var(--primary-green);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .contact-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+            border-radius: 2px;
+        }
+
+        .contact-subtitle {
+            color: var(--text-medium);
+            font-size: 1.1rem;
+        }
+
+        .contact-form {
+            display: grid;
+            gap: 25px;
+        }
+
+        /* Update form group styling */
+        .form-group {
+            position: relative;
+            margin-bottom: 35px;
+        }
+
+        /* Beautiful new input styling */
+        .form-input {
+            width: 100%;
+            padding: 20px 16px;
+            font-size: 16px;
+            color: var(--text-dark);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(45, 90, 61, 0.2);
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Create beautiful label animation */
+        .form-label {
+            position: absolute;
+            left: 16px;
+            top: 20px;
+            font-size: 16px;
+            color: var(--text-medium);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+            padding: 0 5px;
+        }
+
+        /* Input focus and filled state animations */
+        .form-input:focus,
+        .form-input:not(:placeholder-shown) {
+            border-bottom-color: var(--primary-green);
+            box-shadow: 0 1px 0 0 var(--primary-green);
+        }
+
+        .form-input:focus + .form-label,
+        .form-input:not(:placeholder-shown) + .form-label {
+            transform: translateY(-150%) scale(0.85);
+            color: var(--primary-green);
+            font-weight: 500;
+        }
+
+        .message-input:focus + .form-label,
+        .message-input:not(:placeholder-shown) + .form-label {
+            transform: translateY(-170%) scale(0.85);
+        }
+
+        /* Add beautiful line animation */
+        .form-group::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-group:focus-within::after {
+            width: 100%;
+        }
+
+        /* Message input specific styling */
+        .message-input {
+            min-height: 120px;
+            resize: vertical;
+            border: 2px solid rgba(45, 90, 61, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .message-input::-webkit-scrollbar {
+            display: none; /* for Chrome, Safari, and Opera */
+        }
+
+        .message-input:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 15px rgba(45, 90, 61, 0.1);
+        }
+
+        /* Beautiful focus state for inputs */
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Add subtle hover effect */
+        .form-group:hover .form-input {
+            border-bottom-color: rgba(45, 90, 61, 0.4);
+        }
+
+        /* Add success state */
+        .form-input.valid {
+            border-bottom-color: #22c55e;
+        }
+
+        .form-input.valid + .form-label {
+            color: #22c55e;
+        }
+
+        /* Add error state */
+        .form-input.error {
+            border-bottom-color: #ff4444;
+        }
+
+        .form-input.error + .form-label {
+            color: #ff4444;
+        }
+
+        .submit-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: fit-content;
+            padding: 15px 40px;
+            background: var(--primary-green);
+            color: white;
+            border: 2px solid var(--primary-green);
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 40px auto 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(45, 90, 61, 0.3);
+            background: var(--secondary-green);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:disabled {
+            background: var(--border-light);
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        /* Loading state animation */
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid white;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Header/Footer adjustments */
+        .header {
+            background: white;
+        }
+
+        .footer {
+            background: var(--dark-gray);
+        }
+
+        .footer-logo {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li><a href="about.html" class="nav-link">About Us</a></li>
+                    <li><a href="people.html" class="nav-link">People</a></li>
+                    <li><a href="services.html" class="nav-link">Services</a></li>
+                    <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="contact-container">
+            <div class="contact-header">
+                <h1 class="contact-title">Contact Us</h1>
+                <p class="contact-subtitle">Get in touch with our team for any inquiries or support</p>
+            </div>
+
+            <form id="contactForm" class="contact-form">
+                <div class="form-group">
+                    <input type="text" class="form-input" id="firstName" placeholder=" " required>
+                    <label class="form-label" for="firstName">First Name</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-input" id="lastName" placeholder=" " required>
+                    <label class="form-label" for="lastName">Last Name</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="email" class="form-input" id="email" placeholder=" " required>
+                    <label class="form-label" for="email">Email Address</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="tel" class="form-input" id="phone" placeholder=" " required>
+                    <label class="form-label" for="phone">Phone Number</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-input" id="company" placeholder=" " required>
+                    <label class="form-label" for="company">Company Name</label>
+                </div>
+
+                <div class="form-group">
+                    <textarea class="form-input message-input" id="message" placeholder=" " required></textarea>
+                    <label class="form-label" for="message">Your Message</label>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">Send Message</span>
+                    <div class="loading-spinner"></div>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+
+            <div class="success-message">
+                <i class="fas fa-check-circle success-icon"></i>
+                <h2>Thank you for contacting us!</h2>
+                <p>We've received your message and will get back to you soon.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="contact.html" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7A0JxXYHnzQ_LzDBB5SmXbKl-bCv2ZPI",
+            authDomain: "langgov-bf3b8.firebaseapp.com",
+            projectId: "langgov-bf3b8",
+            storageBucket: "langgov-bf3b8.firebasestorage.app",
+            messagingSenderId: "240928957703",
+            appId: "1:240928957703:web:b2e50595e71a2ec966d1a2"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Form submission handler
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = contactForm.querySelector('.submit-btn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const loadingSpinner = submitBtn.querySelector('.loading-spinner');
+        const successMessage = document.querySelector('.success-message');
+
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Check if user is authenticated
+            if (!auth.currentUser) {
+                alert('Please sign in to submit the form');
+                return;
+            }
+
+            // Start loading state
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+
+            try {
+                // Get form data
+                const contactData = {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    company: document.getElementById('company').value,
+                    message: document.getElementById('message').value,
+                    userId: auth.currentUser.uid,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                // Save to Firebase
+                await db.collection('contact').add(contactData);
+
+                // Show success message
+                contactForm.style.display = 'none';
+                successMessage.style.display = 'block';
+
+                // Reset form
+                contactForm.reset();
+
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.style.display = 'block';
+                loadingSpinner.style.display = 'none';
+            }
+        });
+
+        // Language toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const langButtons = document.querySelectorAll('.lang-btn');
+            const translations = {
+                en: {
+                    title: "Contact Us",
+                    subtitle: "Get in touch with our team for any inquiries or support",
+                    firstName: "First Name",
+                    lastName: "Last Name",
+                    email: "Email Address",
+                    phone: "Phone Number",
+                    company: "Company Name",
+                    message: "Your Message",
+                    send: "Send Message",
+                    success: "Thank you for contacting us!",
+                    successMsg: "We've received your message and will get back to you soon."
+                },
+                fr: {
+                    title: "Contactez-nous",
+                    subtitle: "Contactez notre équipe pour toute demande ou assistance",
+                    firstName: "Prénom",
+                    lastName: "Nom",
+                    email: "Adresse Email",
+                    phone: "Numéro de Téléphone",
+                    company: "Nom de l'Entreprise",
+                    message: "Votre Message",
+                    send: "Envoyer",
+                    success: "Merci de nous avoir contactés !",
+                    successMsg: "Nous avons reçu votre message et vous répondrons bientôt."
+                }
+            };
+
+            function updateContent(lang) {
+                document.querySelector('.contact-title').textContent = translations[lang].title;
+                document.querySelector('.contact-subtitle').textContent = translations[lang].subtitle;
+                document.querySelectorAll('.form-label').forEach(label => {
+                    const inputId = label.getAttribute('for');
+                    switch(inputId) {
+                        case 'firstName': label.textContent = translations[lang].firstName; break;
+                        case 'lastName': label.textContent = translations[lang].lastName; break;
+                        case 'email': label.textContent = translations[lang].email; break;
+                        case 'phone': label.textContent = translations[lang].phone; break;
+                        case 'company': label.textContent = translations[lang].company; break;
+                        case 'message': label.textContent = translations[lang].message; break;
+                    }
+                });
+                btnText.textContent = translations[lang].send;
+                document.querySelector('.success-message h2').textContent = translations[lang].success;
+                document.querySelector('.success-message p').textContent = translations[lang].successMsg;
+            }
+
+            // Initialize language from localStorage or default to 'en'
+            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+            updateContent(savedLanguage);
+            
+            langButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === savedLanguage);
+                
+                btn.addEventListener('click', function() {
+                    const lang = this.dataset.lang;
+                    localStorage.setItem('preferredLanguage', lang);
+                    langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+                    updateContent(lang);
+                });
+            });
+        });
+
+        // Add profile button functionality
+        const userIcon = document.querySelector('.fa-user').parentElement;
+        userIcon.addEventListener('click', () => {
+            if (auth.currentUser) {
+                window.location.href = 'main.html'; // For profile view
+            } else {
+                window.location.href = 'main.html'; // For login
+            }
+        });
+    </script>
+</body>
+</html>
