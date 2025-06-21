@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminology Bank - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        .bank-container {
+            max-width: 1200px;
+            margin: 20px auto 60px;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .bank-title {
+            text-align: center;
+            color: var(--text-dark);
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            position: relative;
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border: 3px solid var(--primary-green);
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #f2fbe1, #e1f8ba);
+            width: 100%;
+            font-weight: 800;
+        }
+
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .bank-column {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(to right, #f2fbe1, #e1f8ba);
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bank-column:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .column-icon {
+            font-size: 3rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        .column-title {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .content-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .content-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .content-item:hover {
+            transform: translateY(-3px);
+            background: var(--light-green);
+        }
+
+        .content-item i {
+            color: var(--primary-green);
+        }
+
+        .download-option {
+            background: var(--primary-green);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .download-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .bank-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .bank-column {
+                min-height: auto;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(45, 90, 61, 0.15);
+            z-index: 1000;
+            max-width: 90%;
+            width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-green), #3d6b4d);
+            color: white;
+            padding: 30px;
+            position: relative;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            margin: 25px 0 0 0;
+            text-align: center;
+            font-weight: 600;
+            width: 100%;
+            padding: 0 40px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 25px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 40px;
+            max-height: 70vh;
+            overflow-y: auto;
+            /* Hide scrollbar while maintaining functionality */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer and Edge */
+        }
+
+        /* Hide scrollbar for Webkit browsers (Chrome, Safari, etc) */
+        .modal-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        .content-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .content-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: var(--primary-green);
+        }
+
+        .content-box.active {
+            border-color: var(--primary-green);
+            background: var(--light-green);
+        }
+
+        .content-box-header {
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .content-box-title {
+            font-size: 1.1rem;
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .content-box-icon {
+            color: var(--primary-green);
+            transition: transform 0.3s ease;
+            display: none;
+        }
+
+        .content-box.active .content-box-icon {
+            transform: rotate(180deg);
+        }
+
+        .content-box-body {
+            display: none;
+        }
+
+        .term-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 25px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--light-green), var(--box-color));
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .term-item:hover {
+            transform: translateX(8px);
+            border-color: var(--primary-green);
+            box-shadow: 0 4px 15px rgba(45, 90, 61, 0.1);
+        }
+
+        .term-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .term-fr {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .term-divider {
+            color: var(--primary-green);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 20px;
+        }
+
+        .term-en {
+            color: var(--text-medium);
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-box.active .term-item {
+            animation: slideDown 0.3s ease forwards;
+        }
+
+        .term-item:nth-child(1) { animation-delay: 0.1s; }
+        .term-item:nth-child(2) { animation-delay: 0.15s; }
+        .term-item:nth-child(3) { animation-delay: 0.2s; }
+        .term-item:nth-child(4) { animation-delay: 0.25s; }
+        .term-item:nth-child(5) { animation-delay: 0.3s; }
+        .term-item:nth-child(6) { animation-delay: 0.35s; }
+        .term-item:nth-child(7) { animation-delay: 0.4s; }
+        .term-item:nth-child(8) { animation-delay: 0.45s; }
+    </style>
+
+    <!-- Add these styles to your existing styles section -->
+    <style>
+        .search-container {
+            padding: 0 10px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-green);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.1);
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        /* Instead, make search results use the same styling as term items */
+        .search-result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 25px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--light-green), var(--box-color));
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .search-result-item:hover {
+            transform: translateX(8px);
+            border-color: var(--primary-green);
+            box-shadow: 0 4px 15px rgba(45, 90, 61, 0.1);
+        }
+
+        .search-result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Also update result text styles to match terms */
+        .result-fr {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .result-divider {
+            color: var(--primary-green);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 20px;
+        }
+
+        .result-en {
+            color: var(--text-medium);
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-medium);
+            font-style: italic;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .search-result-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .result-divider {
+                margin: 5px 0;
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+
+    <!-- Add new styles within the existing style section -->
+    <style>
+        /* Add these styles to your existing styles */
+        .term-detail {
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .term-definition {
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--light-green);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .term-definition h4 {
+            color: var(--primary-green);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .term-example {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .term-example h4 {
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .example-text {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid var(--primary-green);
+            font-style: italic;
+        }
+
+        .back-modal {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .back-modal:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .back-modal i {
+            font-size: 0.9rem;
+        }
+
+        /* Update letter section styles to work without the alphabet bar */
+        .letter-section {
+            margin-bottom: 30px;
+            padding-top: 0;
+        }
+
+        .letter-header {
+            font-size: 1.8rem;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-green);
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+
+        .alphabetical-list {
+            padding: 0;
+        }
+
+        /* Styles for alphabetical browser */
+        #alphabeticalModal .modal-body {
+            display: flex;
+            gap: 5px;
+            padding: 20px 15px 20px 5px;
+        }
+
+        .alphabet-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            padding-right: 5px;
+            border-right: 1px solid var(--border-light);
+            overflow-y: auto;
+            height: calc(60vh - 40px);
+            scrollbar-width: none; /* Firefox */
+           -ms-overflow-style: none;  /* IE and Edge */
+        }
+        
+        .alphabet-nav::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, and Opera */
+        }
+
+        .alphabet-letter {
+            padding: 2px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease, color 0.3s ease;
+            font-weight: 600;
+            color: var(--primary-green);
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .alphabet-letter:hover, .alphabet-letter.active {
+            background: var(--primary-green);
+            color: white;
+        }
+        
+        .alphabet-letter.disabled {
+            color: var(--border-light);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .alphabetical-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            height: calc(60vh - 40px);
+            padding-left: 5px;
+            scroll-behavior: smooth;
+            scrollbar-width: none; /* Firefox */
+           -ms-overflow-style: none;  /* IE and Edge */
+        }
+        
+        .alphabetical-list::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, and Opera */
+        }
+
+        .letter-section {
+            margin-bottom: 30px;
+        }
+
+        .letter-header {
+            font-size: 1.8rem;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-green);
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+    </style>
+
+    <style>
+        #quizModal .modal-body {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .quiz-question {
+            margin-bottom: 30px;
+            animation: fadeIn 0.3s ease;
+            padding: 30px;
+            font-size: 1.1rem;
+        }
+
+        .quiz-question h4 {
+            color: var(--primary-green);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Association Quiz Style */
+        .association-quiz {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            margin: 30px 0;
+            align-items: start;
+        }
+
+        .terms-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .term-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.15rem;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .term-card.selected {
+            border-color: var(--primary-green);
+            background: var(--light-green);
+        }
+
+        .association-line {
+            width: 2px;
+            height: 100%;
+            background: var(--border-light);
+            margin: 0 auto;
+        }
+
+        /* Fill in the Blank Quiz Style */
+        .fill-blank-quiz {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .fill-blank-sentence {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .blank-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .blank-option {
+            padding: 15px 30px;
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.15rem;
+        }
+
+        .blank-option:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
+        .blank-option.selected {
+            background: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+        }
+
+        /* Multiple Choice Quiz Style */
+        .multiple-choice-quiz .quiz-option {
+            padding: 20px 25px;
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.15rem;
+            margin-bottom: 15px;
+        }
+
+        .multiple-choice-quiz .quiz-option:hover {
+            border-color: var(--primary-green);
+            transform: translateX(5px);
+        }
+
+        .multiple-choice-quiz .quiz-option.selected {
+            background: var(--light-green);
+            border-color: var(--primary-green);
+        }
+
+        .option-letter {
+            width: 35px;
+            height: 35px;
+            background: var(--border-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Feedback Styles - Update the colors for incorrect feedback */
+        .feedback-message {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            font-size: 1.15rem;
+        }
+
+        .feedback-message.correct {
+            background: #e7f6e7;
+            color: #2e7d32;
+            border: 1px solid #81c784;
+        }
+
+        .feedback-message.incorrect {
+            background: #fbe9e7;
+            color: #d32f2f;
+            border: 1px solid #e57373;
+        }
+
+        .feedback-message i {
+            margin-right: 10px;
+        }
+
+        /* Quiz Navigation */
+        .quiz-navigation {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .quiz-nav-btn {
+            padding: 15px 30px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+        }
+
+        .quiz-nav-btn:disabled {
+            background: var(--border-light);
+            cursor: not-allowed;
+        }
+
+        .quiz-nav-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+        }
+
+        /* Quiz Progress */
+        .quiz-progress {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .progress-text {
+            margin-bottom: 15px;
+            color: var(--text-medium);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-green);
+            width: 33.33%;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Update error styles for options */
+        .quiz-option.error {
+            border-color: #ff4444;
+            background: #fbe9e7;
+            animation: shake 0.5s ease;
+        }
+
+        .blank-option.error {
+            border-color: #ff4444;
+            background: #fbe9e7;
+            animation: shake 0.5s ease;
+        }
+
+        /* Make sure error states use red colors */
+        .term-card.error,
+        .quiz-option.error,
+        .blank-option.error {
+            border-color: #ff4444 !important;
+            background: #fbe9e7 !important;
+        }
+
+        /* Update shake animation for better visibility */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        /* Ensure error message icons are red */
+        .feedback-message.incorrect i {
+            color: #ff4444;
+        }
+
+        /* Ensure responsiveness */
+        @media (max-width: 992px) {
+            .modal {
+                width: 95%;
+                max-height: 95vh;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li class="services-nav">
+                        <a href="services.html" class="nav-link">Services</a>
+                        <div class="services-dropdown">
+                            <a href="document-translation.html" class="dropdown-item">
+                                <i class="fas fa-file-alt"></i>
+                                Document Translation
+                            </a>
+                            <a href="online-courses.html" class="dropdown-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                Online Courses
+                            </a>
+                            <a href="inter.html" class="dropdown-item">
+                                <i class="fas fa-globe"></i>
+                                International Correspondence
+                            </a>
+                            <a href="consult.html" class="dropdown-item">
+                                <i class="fas fa-comments"></i>
+                                Language Consulting
+                            </a>
+                            <a href="bank.html" class="dropdown-item">
+                                <i class="fas fa-book"></i>
+                                Terminology Bank
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="bank-container">
+            <h1 class="bank-title">
+                <span class="english">Terminology Bank</span>
+                <span class="french">Banque de Terminologie</span>
+            </h1>
+            
+            <div class="bank-grid">
+                <div class="bank-column">
+                    <i class="fas fa-book-open column-icon"></i>
+                    <h2 class="column-title">
+                        <span class="english">Explore Key Language Terms</span>
+                        <span class="french">Explorer les Termes Clés</span>
+                    </h2>
+                    <p style="color: var(--text-medium); margin-bottom: 25px; font-size: 1.1rem; line-height: 1.5;">
+                        <span class="english">A curated list of essential terms for navigating language transition in public institutions</span>
+                        <span class="french">Une liste sélectionnée de termes essentiels pour guider la transition linguistique dans les institutions publiques</span>
+                    </p>
+                    
+                    <!-- Common administrative expressions -->
+                    <div class="content-box">
+                        <div class="content-box-header">
+                            <h3 class="content-box-title">Common Bilingual Administrative Expressions</h3>
+                        </div>
+                    </div>
+
+                    <!-- Public institutions -->
+                    <div class="content-box">
+                        <div class="content-box-header">
+                            <h3 class="content-box-title">Public Institutions & Functions</h3>
+                        </div>
+                    </div>
+
+                    <!-- Sovereign ministries -->
+                    <div class="content-box">
+                        <div class="content-box-header">
+                            <h3 class="content-box-title">Sovereign Ministries</h3>
+                        </div>
+                    </div>
+
+                    <!-- Economic ministries -->
+                    <div class="content-box">
+                        <div class="content-box-header">
+                            <h3 class="content-box-title">Economic Ministries</h3>
+                        </div>
+                    </div>
+
+                    <!-- Legal documents -->
+                    <div class="content-box">
+                        <div class="content-box-header">
+                            <h3 class="content-box-title">Types of Legal/Official Documents</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bank-column">
+                    <i class="fas fa-lightbulb column-icon"></i>
+                    <h2 class="column-title">
+                        <span class="english">Learn & Apply</span>
+                        <span class="french">Apprendre & Appliquer</span>
+                    </h2>
+                    <p style="color: var(--text-medium); margin-bottom: 25px; font-size: 1.1rem; line-height: 1.5;">
+                        <span class="english">Boost your practical knowledge of key administrative terms through interactive tools.</span>
+                        <span class="french">Améliorez votre connaissance pratique des termes administratifs clés grâce à des outils interactifs.</span>
+                    </p>
+                    <ul class="content-list">
+                        <li class="content-item" id="searchGlossaryBtn">
+                            <i class="fas fa-search"></i>
+                            <span class="english">Search the Glossary</span>
+                            <span class="french">Rechercher dans le Glossaire</span>
+                        </li>
+                        <li class="content-item">
+                            <i class="fas fa-sort-alpha-down"></i>
+                            <span class="english">Browse Terms A-Z</span>
+                            <span class="french">Parcourir les Termes A–Z</span>
+                        </li>
+                        <li class="content-item" id="quizYourselfBtn">
+                            <i class="fas fa-question-circle"></i>
+                            <span class="english">Quiz Yourself</span>
+                            <span class="french">Testez vos Connaissances</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bank-column">
+                    <i class="fas fa-download column-icon"></i>
+                    <h2 class="column-title">
+                        <span class="english">Take it with you</span>
+                        <span class="french">Emportez-le avec vous</span>
+                    </h2>
+                    <ul class="content-list">
+                        <li class="content-item">
+                            <i class="fas fa-file-pdf"></i>
+                            <span class="english">Download PDF Guide</span>
+                            <span class="french">Télécharger le Guide PDF</span>
+                        </li>
+                        <li class="content-item">
+                            <i class="fas fa-print"></i>
+                            <span class="english">Print Version</span>
+                            <span class="french">Version Imprimable</span>
+                        </li>
+                    </ul>
+                    <div class="download-option">
+                        <i class="fas fa-cloud-download-alt"></i>
+                        <span class="english">Download Complete Glossary</span>
+                        <span class="french">Télécharger le Glossaire Complet</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle"></h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="terms-list"></div>
+        </div>
+    </div>
+
+    <div id="searchModal" class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <span class="english">Search Glossary</span>
+                <span class="french">Rechercher dans le Glossaire</span>
+            </h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Type to search..." class="search-input">
+                </div>
+                <div id="searchResults" class="search-results">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this new modal for alphabetical browsing after the other modals -->
+    <div id="alphabeticalModal" class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <span class="english">Browse Terms A-Z</span>
+                <span class="french">Parcourir les Termes A–Z</span>
+            </h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="alphabet-nav">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            <div id="alphabeticalList" class="alphabetical-list">
+                <!-- Terms will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add a new modal for term details -->
+    <div id="termDetailModal" class="modal">
+        <div class="modal-header">
+            <button class="back-modal">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h3 class="modal-title" id="termDetailTitle"></h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="termDetailContent"></div>
+        </div>
+    </div>
+
+    <div id="quizModal" class="modal">
+        <div class="modal-header">
+            <button class="back-modal" style="display: none;">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h3 class="modal-title">
+                <span class="english">Test Your Knowledge</span>
+                <span class="french">Testez Vos Connaissances</span>
+            </h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="quizContainer">
+                <!-- Current question will be displayed here -->
+            </div>
+            <div class="quiz-navigation" style="display: none;">
+                <button id="nextQuestionBtn" class="quiz-nav-btn" disabled>
+                    <span class="english">Next Question</span>
+                    <span class="french">Question Suivante</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <div id="quizProgress" class="quiz-progress">
+                <div class="progress-text">
+                    <span class="english">Question</span>
+                    <span class="french">Question</span>
+                    <span id="currentQuestionNum">1</span>/
+                    <span id="totalQuestions">3</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay"></div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="bank.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get modal elements using correct selectors
+            const modal = document.querySelector('.modal');
+            const modalTitle = document.querySelector('.modal-title');
+            const modalContent = document.querySelector('.terms-list');
+            const overlay = document.querySelector('.overlay');
+
+            // Get search elements
+            const searchBtn = document.getElementById('searchGlossaryBtn');
+            const searchModal = document.getElementById('searchModal');
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+
+            // Updated terms data with detailed information
+            const termsData = {
+                'Common Bilingual Administrative Expressions': [
+                    {
+                        fr: 'Journal Officiel',
+                        en: 'Official Gazette',
+                        defFr: 'Publication officielle contenant les textes législatifs et réglementaires de la République.',
+                        defEn: 'Official publication containing legislative and regulatory texts of the Republic.',
+                        exampleFr: 'La nouvelle loi sera publiée dans le Journal Officiel la semaine prochaine.',
+                        exampleEn: 'The new law will be published in the Official Gazette next week.'
+                    },
+                    {
+                        fr: 'Décret',
+                        en: 'Decree',
+                        defFr: 'Acte réglementaire pris par le Président ou le Premier ministre, souvent publié au Journal Officiel.',
+                        defEn: 'Regulatory act issued by the President or the Prime Minister, often published in the Official Gazette.',
+                        exampleFr: 'Le décret n°23-55 a été publié au JO du 12 mars.',
+                        exampleEn: 'Decree no. 23-55 was published in the Official Gazette on March 12.'
+                    },
+                ],
+                'Public Institutions & Functions': [
+                    {
+                        fr: 'Présidence de la République',
+                        en: 'Presidency of the Republic',
+                        defFr: "Institution suprême de l'État algérien, dirigée par le Président de la République qui est le chef de l'État.",
+                        defEn: 'Supreme institution of the Algerian state, led by the President of the Republic who is the head of state.',
+                        exampleFr: 'La Présidence de la République a annoncé de nouvelles mesures économiques.',
+                        exampleEn: 'The Presidency of the Republic announced new economic measures.'
+                    },
+                    {
+                        fr: 'Conseil de la Nation',
+                        en: 'Council of the Nation',
+                        defFr: "Chambre haute du Parlement algérien, composée de représentants élus et nommés.",
+                        defEn: 'Upper house of the Algerian Parliament, composed of elected and appointed representatives.',
+                        exampleFr: 'Le Conseil de la Nation a approuvé le projet de loi à la majorité.',
+                        exampleEn: 'The Council of the Nation approved the bill by majority.'
+                    },
+                    {
+                        fr: 'Assemblée Populaire Nationale',
+                        en: "People's National Assembly",
+                        defFr: "Chambre basse du Parlement algérien, élue au suffrage universel direct.",
+                        defEn: 'Lower house of the Algerian Parliament, elected by direct universal suffrage.',
+                        exampleFr: "L'Assemblée Populaire Nationale débat actuellement du budget 2025.",
+                        exampleEn: "The People's National Assembly is currently debating the 2025 budget."
+                    },
+                    {
+                        fr: 'Conseil Constitutionnel',
+                        en: 'Constitutional Council',
+                        defFr: "Institution chargée de veiller au respect de la Constitution.",
+                        defEn: 'Institution responsible for ensuring compliance with the Constitution.',
+                        exampleFr: 'Le Conseil Constitutionnel a validé les résultats des élections.',
+                        exampleEn: 'The Constitutional Council validated the election results.'
+                    }
+                ],
+                'Sovereign Ministries': [
+                    {
+                        fr: 'Ministère de la Défense Nationale',
+                        en: 'Ministry of National Defense',
+                        defFr: "Ministère responsable de la défense nationale et de la sécurité du territoire.",
+                        defEn: 'Ministry responsible for national defense and territorial security.',
+                        exampleFr: 'Le Ministère de la Défense Nationale a organisé un exercice militaire conjoint.',
+                        exampleEn: 'The Ministry of National Defense organized a joint military exercise.'
+                    },
+                    {
+                        fr: "Ministère de l'Intérieur",
+                        en: 'Ministry of Interior',
+                        defFr: "Ministère chargé de la sécurité intérieure et de l'administration territoriale.",
+                        defEn: 'Ministry in charge of internal security and territorial administration.',
+                        exampleFr: "Le Ministère de l'Intérieur a renforcé les mesures de sécurité.",
+                        exampleEn: 'The Ministry of Interior has strengthened security measures.'
+                    },
+                    {
+                        fr: 'Ministère de la Justice',
+                        en: 'Ministry of Justice',
+                        defFr: "Ministère responsable du système judiciaire et de l'application des lois.",
+                        defEn: 'Ministry responsible for the judicial system and law enforcement.',
+                        exampleFr: 'Le Ministère de la Justice a lancé une réforme du système pénitentiaire.',
+                        exampleEn: 'The Ministry of Justice launched a reform of the prison system.'
+                    },
+                    {
+                        fr: 'Ministère des Affaires Étrangères',
+                        en: 'Ministry of Foreign Affairs',
+                        defFr: "Ministère chargé des relations diplomatiques et de la politique étrangère.",
+                        defEn: 'Ministry in charge of diplomatic relations and foreign policy.',
+                        exampleFr: 'Le Ministère des Affaires Étrangères négocie de nouveaux accords commerciaux.',
+                        exampleEn: 'The Ministry of Foreign Affairs is negotiating new trade agreements.'
+                    }
+                ],
+                'Economic Ministries': [
+                    {
+                        fr: 'Ministère des Finances',
+                        en: 'Ministry of Finance',
+                        defFr: "Ministère responsable de la gestion des finances publiques et de la politique économique.",
+                        defEn: 'Ministry responsible for public finance management and economic policy.',
+                        exampleFr: 'Le Ministère des Finances a présenté le projet de loi de finances 2025.',
+                        exampleEn: 'The Ministry of Finance presented the 2025 finance bill.'
+                    },
+                    {
+                        fr: "Ministère de l'Industrie",
+                        en: 'Ministry of Industry',
+                        defFr: "Ministère chargé du développement industriel et de l'innovation technologique.",
+                        defEn: 'Ministry in charge of industrial development and technological innovation.',
+                        exampleFr: "Le Ministère de l'Industrie a lancé un programme de modernisation.",
+                        exampleEn: 'The Ministry of Industry launched a modernization program.'
+                    }
+                ],
+                'Types of Legal/Official Documents': [
+                    {
+                        fr: 'Lois & Décrets',
+                        en: 'Laws & Decrees',
+                        defFr: "Textes législatifs et réglementaires adoptés par le Parlement et le gouvernement.",
+                        defEn: 'Legislative and regulatory texts adopted by Parliament and government.',
+                        exampleFr: 'Les nouvelles lois et décrets entreront en vigueur le mois prochaine.',
+                        exampleEn: 'The new laws and decrees will come into effect next month.'
+                    },
+                    {
+                        fr: 'Réglementations',
+                        en: 'Regulations',
+                        defFr: "Ensemble des règles administratives régissant un domaine spécifique.",
+                        defEn: 'Set of administrative rules governing a specific area.',
+                        exampleFr: 'Les nouvelles réglementations environnementales sont plus strictes.',
+                        exampleEn: 'The new environmental regulations are stricter.'
+                    },
+                    {
+                        fr: 'Textes juridiques consolidés',
+                        en: 'Consolidated Legal Texts',
+                        defFr: "Version à jour d'un texte juridique intégrant toutes les modifications successives.",
+                        defEn: 'Updated version of a legal text incorporating all successive modifications.',
+                        exampleFr: 'La version consolidée du Code civil est disponible en ligne.',
+                        exampleEn: 'The consolidated version of the Civil Code is available online.'
+                    }
+                ]
+            };
+
+            // Create a flat array for searching
+            const allTerms = [];
+            Object.entries(termsData).forEach(([category, terms]) => {
+                terms.forEach(term => {
+                    allTerms.push({
+                        category: category,
+                        ...term
+                    });
+                });
+            });
+
+            // Function to show term detail modal
+            function showTermDetail(term) {
+                const termDetailModal = document.getElementById('termDetailModal');
+                const termDetailTitle = document.getElementById('termDetailTitle');
+                const termDetailContent = document.getElementById('termDetailContent');
+                const searchModal = document.getElementById('searchModal');
+                
+                termDetailTitle.textContent = `${term.fr} – ${term.en}`;
+                
+                termDetailContent.innerHTML = `
+                    <div class="term-detail">
+                        <div class="term-definition">
+                            <h4>Définition (FR):</h4>
+                            <p>${term.defFr || 'Définition non disponible'}</p>
+                        </div>
+                        
+                        <div class="term-definition">
+                            <h4>Definition (EN):</h4>
+                            <p>${term.defEn || 'Definition not available'}</p>
+                        </div>
+                        
+                        <div class="term-example">
+                            <h4>Exemple d'usage / Example of use:</h4>
+                            <div class="example-text">
+                                FR: "${term.exampleFr || 'Exemple non disponible'}"
+                            </div>
+                            <div class="example-text">
+                                EN: "${term.exampleEn || 'Example not available'}"
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Hide search modal and show detail modal
+                searchModal.style.display = 'none';
+                termDetailModal.style.display = 'block';
+                
+                // Add back button handler
+                const backBtn = termDetailModal.querySelector('.back-modal');
+                backBtn.onclick = () => {
+                    termDetailModal.style.display = 'none';
+                    searchModal.style.display = 'block';
+                };
+            }
+
+            // Search functionality
+            function performSearch(query) {
+                if (!query) {
+                    searchResults.innerHTML = '';
+                    return;
+                }
+
+                query = query.toLowerCase();
+                const results = allTerms.filter(term => 
+                    term.fr.toLowerCase().includes(query) || 
+                    term.en.toLowerCase().includes(query)
+                );
+
+                if (results.length === 0) {
+                    searchResults.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-search"></i>
+                            <p>No results found</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                searchResults.innerHTML = results.map(term => `
+                    <div class="search-result-item" onclick="showTermDetail(${JSON.stringify(term).replace(/"/g, '&quot;')})">
+                        <span class="result-fr">${term.fr}</span>
+                        <span class="result-divider">→</span>
+                        <span class="result-en">${term.en}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Add event listeners for search
+            searchBtn.addEventListener('click', () => {
+                searchModal.style.display = 'block';
+                overlay.style.display = 'block';
+                searchInput.focus();
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                performSearch(e.target.value);
+            });
+
+            // Updated click handler for content boxes
+            document.querySelectorAll('.content-box').forEach(box => {
+                box.addEventListener('click', function() {
+                    const title = this.querySelector('.content-box-title').textContent;
+                    const terms = termsData[title];
+                    
+                    if (terms) {
+                        modalTitle.textContent = title;
+                        modalContent.innerHTML = terms.map(term => `
+                            <div class="term-item">
+                                <span class="term-fr">${term.fr}</span>
+                                <span class="term-divider">→</span>
+                                <span class="term-en">${term.en}</span>
+                            </div>
+                        `).join('');
+                        
+                        modal.style.display = 'block';
+                        overlay.style.display = 'block';
+                    }
+                });
+            });
+
+            // Update close modal handlers to include new term detail modal
+            document.querySelectorAll('.close-modal, .overlay').forEach(element => {
+                element.addEventListener('click', () => {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                    overlay.style.display = 'none';
+                });
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                    overlay.style.display = 'none';
+                }
+            });
+
+            // Make showTermDetail available globally
+            window.showTermDetail = showTermDetail;
+
+            // Add click handler for Browse Terms A-Z
+            document.querySelector('.content-item:nth-child(2)').addEventListener('click', showAlphabeticalBrowser);
+
+            function showAlphabeticalBrowser() {
+                const alphabeticalModal = document.getElementById('alphabeticalModal');
+                const alphabeticalList = document.getElementById('alphabeticalList');
+                
+                // Create alphabet array
+                const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                
+                // Get all terms and sort them
+                const sortedTerms = allTerms.sort((a, b) => a.fr.localeCompare(b.fr));
+                
+                // Group terms by first letter
+                const termsByLetter = {};
+                sortedTerms.forEach(term => {
+                    const firstLetter = term.fr.charAt(0).toUpperCase();
+                    if (!termsByLetter[firstLetter]) {
+                        termsByLetter[firstLetter] = [];
+                    }
+                    termsByLetter[firstLetter].push(term);
+                });
+                
+                // Create sections for each letter that has terms
+                alphabeticalList.innerHTML = alphabet.map(letter => {
+                    if (!termsByLetter[letter]) return '';
+                    
+                    return `
+                        <div class="letter-section" id="letter-${letter}">
+                            <h2 class="letter-header">${letter}</h2>
+                            ${termsByLetter[letter].map(term => `
+                                <div class="term-item" onclick="showTermDetail(${JSON.stringify(term).replace(/"/g, '&quot;')})">
+                                    <span class="term-fr">${term.fr}</span>
+                                    <span class="term-divider">→</span>
+                                    <span class="term-en">${term.en}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }).join('');
+                
+                // Show the modal
+                alphabeticalModal.style.display = 'block';
+                overlay.style.display = 'block';
+            }
+
+            document.getElementById('quizYourselfBtn').addEventListener('click', () => {
+                const quizModal = document.getElementById('quizModal');
+                quizModal.style.display = 'block';
+                overlay.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
