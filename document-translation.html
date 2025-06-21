@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrative Document Translation - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .translation-container {
+            max-width: 800px;
+            margin: 120px auto 60px;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .translation-title {
+            text-align: center;
+            color: var(--primary-green);
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+        }
+
+        .translation-step {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .translation-step:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .file-type-icons {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .file-type-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .file-type-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-green);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            color: var(--primary-green);
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border-light);
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-green);
+            background: var(--light-green);
+        }
+
+        .supported-formats {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--medium-gray);
+        }
+
+        .language-selection {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .language-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-option:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
+        .language-option.selected {
+            background: var(--light-green);
+            border-color: var(--primary-green);
+        }
+
+        .flag-icon {
+            width: 30px;
+            height: 30px;
+        }
+
+        .preview-container {
+            border: 1px solid var(--border-light);
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: "Segoe UI", "Inter", sans-serif;
+            background: #f9f9f9;
+            line-height: 1.6;
+        }
+
+        .preview-box {
+            white-space: pre-wrap;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: "Segoe UI", sans-serif;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .ai-assist {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--light-green);
+            border-radius: 10px;
+        }
+
+        .ai-icon {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(45, 90, 61, 0.3);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        #extractedTextPreview {
+            white-space: pre-wrap;
+            font-family: "Courier New", monospace;
+        }
+        
+        #translatedContent {
+            white-space: pre-wrap;
+            font-family: "Segoe UI", "Inter", sans-serif;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar-btn:hover {
+            background: #e9e9e9;
+        }
+
+        .toolbar-btn.active {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .toolbar-select {
+            padding: 3px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .editable-preview {
+            white-space: pre-wrap;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 0 0 8px 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-family: "Segoe UI", sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            min-height: 200px;
+            overflow: visible;
+            outline: none;
+        }
+
+        .editable-preview:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 5px rgba(45, 90, 61, 0.3);
+        }
+
+        .text-preview {
+            white-space: pre-wrap;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-family: "Segoe UI", sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            max-height: none;
+            overflow: visible;
+            text-align: left;
+        }
+
+        .editor-container {
+            margin-bottom: 20px;
+        }
+
+        .print-preview-container {
+            margin-bottom: 30px;
+        }
+
+        .print-preview-box {
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            padding: 40px;
+            margin-bottom: 20px;
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .print-preview-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 248, 248, 0.9) 100%);
+            pointer-events: none;
+            border-radius: 8px;
+        }
+
+        .print-preview-box > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .print-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(45, 90, 61, 0.3);
+        }
+
+        .new-translation-btn {
+            background: transparent;
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .new-translation-btn:hover {
+            background: var(--primary-green);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(45, 90, 61, 0.3);
+        }
+
+        @media print {
+            /* Update the print media query */
+            body * {
+                visibility: hidden;
+            }
+            
+            .print-preview-box, .print-preview-box * {
+                visibility: visible;
+            }
+            
+            .print-preview-box {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                margin: 0;
+                padding: 20px;
+                background: white;
+                border: none;
+                box-shadow: none;
+                font-size: 12px;
+                page-break-inside: avoid;
+                transform: none;
+            }
+            
+            .print-preview-box::before {
+                display: none;
+            }
+            
+            /* Hide header text in print output */
+            @page {
+                margin: 0.5cm;
+                size: auto;
+            }
+            
+            /* Hide all other elements completely */
+            .header,
+            .footer,
+            .translation-container > *:not(#printSection),
+            .translation-step:not(#printSection),
+            .print-controls {
+                display: none !important;
+            }
+            
+            #printSection {
+                margin: 0;
+                padding: 0;
+                border: none;
+                background: white;
+                position: static;
+            }
+            
+            .print-preview-container {
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Remove browser-generated header/footer content */
+            html {
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li class="services-nav">
+                        <a href="services.html" class="nav-link">Services</a>
+                        <div class="services-dropdown">
+                            <a href="document-translation.html" class="dropdown-item">
+                                <i class="fas fa-file-alt"></i>
+                                Document Translation
+                            </a>
+                            <a href="online-courses.html" class="dropdown-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                Online Courses
+                            </a>
+                            <a href="inter.html" class="dropdown-item">
+                                <i class="fas fa-globe"></i>
+                                International Correspondence
+                            </a>
+                            <a href="consult.html" class="dropdown-item">
+                                <i class="fas fa-comments"></i>
+                                Language Consulting
+                            </a>
+                            <a href="bank.html" class="dropdown-item">
+                                <i class="fas fa-book"></i>
+                                Terminology Bank
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="translation-container">
+            <h1 class="translation-title">Administrative Document Translation</h1>
+            
+            <div class="translation-step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <h2 class="step-title">Select Document</h2>
+                    <div class="file-type-icons">
+                        <img src="doc_icon.png" alt="Text Document" title="Text Document" class="file-type-icon">
+                        <img src="pdf_icon.png" alt="PDF Document" title="PDF Document" class="file-type-icon">
+                        <img src="word_icon.png" alt="Word Document" title="Word Document" class="file-type-icon">
+                        <img src="excel_icon.png" alt="Excel Document" title="Excel Document" class="file-type-icon">
+                    </div>
+                </div>
+                <div class="file-upload">
+                    <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--primary-green)"></i>
+                    <p>Drag and drop your file here or click to browse</p>
+                    <div class="supported-formats">
+                        Supported formats: Text files, PDF, Word, Excel
+                    </div>
+                </div>
+            </div>
+
+            <div class="translation-step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <h2 class="step-title">Select Language</h2>
+                </div>
+                <div class="language-selection">
+                    <div class="language-option">
+                        <img src="uk_flag.png" alt="English" class="flag-icon">
+                        <span>English</span>
+                    </div>
+                    <div class="language-option">
+                        <img src="fr_flag.png" alt="French" class="flag-icon">
+                        <span>French</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="translation-step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <h2 class="step-title">Preview Translation</h2>
+                </div>
+                
+                <div class="editor-container">
+                    <h3 style="color: var(--primary-green); margin-bottom: 15px;">Extracted Text:</h3>
+                    <div class="preview-container" id="extractedPreview">
+                        <p>Your extracted document text will appear here...</p>
+                    </div>
+                    
+                    <!-- Editable Extracted Text -->
+                    <div id="originalTextContainer" style="display: none;">
+                        <div class="editor-toolbar" id="originalToolbar">
+                            <select class="toolbar-select" onchange="formatText('originalText', 'fontSize', this.value)">
+                                <option value="">Font Size</option>
+                                <option value="12px">12px</option>
+                                <option value="14px">14px</option>
+                                <option value="16px">16px</option>
+                                <option value="18px">18px</option>
+                                <option value="20px">20px</option>
+                                <option value="24px">24px</option>
+                            </select>
+                            <button class="toolbar-btn" onclick="formatText('originalText', 'bold')" title="Bold">
+                                <b>B</b>
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('originalText', 'italic')" title="Italic">
+                                <i>I</i>
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('originalText', 'underline')" title="Underline">
+                                <u>U</u>
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('originalText', 'justifyLeft')" title="Align Left">
+                                ⇤
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('originalText', 'justifyCenter')" title="Align Center">
+                                ⇌
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('originalText', 'justifyRight')" title="Align Right">
+                                ⇥
+                            </button>
+                            <button class="toolbar-btn" onclick="clearFormatting('originalText')" title="Clear Formatting">
+                                Clear
+                            </button>
+                            <button class="toolbar-btn" onclick="copyText('originalText')" title="Copy">
+                                📋
+                            </button>
+                        </div>
+                        <div id="originalText" class="editable-preview" contenteditable="true"></div>
+                    </div>
+                </div>
+                
+                <div class="editor-container">
+                    <h3 style="color: var(--primary-green); margin-bottom: 15px;">Translated Text:</h3>
+                    <div class="preview-container" id="translatedPreview">
+                        <p>Your translated document will appear here...</p>
+                    </div>
+                    
+                    <!-- Editable Translated Text -->
+                    <div id="translatedTextContainer" style="display: none;">
+                        <div class="editor-toolbar" id="translatedToolbar">
+                            <select class="toolbar-select" onchange="formatText('translatedText', 'fontSize', this.value)">
+                                <option value="">Font Size</option>
+                                <option value="12px">12px</option>
+                                <option value="14px">14px</option>
+                                <option value="16px">16px</option>
+                                <option value="18px">18px</option>
+                                <option value="20px">20px</option>
+                                <option value="24px">24px</option>
+                            </select>
+                            <button class="toolbar-btn" onclick="formatText('translatedText', 'bold')" title="Bold">
+                                <b>B</b>
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('translatedText', 'italic')" title="Italic">
+                                <i>I</i>
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('translatedText', 'underline')" title="Underline">
+                                <u>U</u>
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('translatedText', 'justifyLeft')" title="Align Left">
+                                ⇤
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('translatedText', 'justifyCenter')" title="Align Center">
+                                ⇌
+                            </button>
+                            <button class="toolbar-btn" onclick="formatText('translatedText', 'justifyRight')" title="Align Right">
+                                ⇥
+                            </button>
+                            <button class="toolbar-btn" onclick="clearFormatting('translatedText')" title="Clear Formatting">
+                                Clear
+                            </button>
+                            <button class="toolbar-btn" onclick="copyText('translatedText')" title="Copy">
+                                📋
+                            </button>
+                        </div>
+                        <div id="translatedText" class="editable-preview" contenteditable="true"></div>
+                    </div>
+                </div>
+                
+                <h2 style="color: var(--primary-green); margin-bottom: 15px; display: none;">Translated Letter:</h2>
+                <div id="translatedBox" class="translated-letter" style="display: none;"></div>
+                
+                <div class="ai-assist">
+                    <i class="fas fa-robot ai-icon"></i>
+                    <div>
+                        <strong>AI-Powered Translation</strong>
+                        <p>Our AI tools assist for higher accuracy and speed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Print Section -->
+            <div class="translation-step" id="printSection" style="display: none;">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <h2 class="step-title">Print Document</h2>
+                </div>
+                
+                <div class="print-preview-container">
+                    <h3 style="color: var(--primary-green); margin-bottom: 15px;">Print Preview:</h3>
+                    <div id="printPreview" class="print-preview-box">
+                        <!-- Translated content will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="print-controls">
+                    <button id="printBtn" class="print-btn">
+                        <i class="fas fa-print"></i> Print Document
+                    </button>
+                    <button id="newTranslationBtn" class="new-translation-btn">
+                        <i class="fas fa-plus"></i> New Translation
+                    </button>
+                </div>
+            </div>
+
+            <button class="submit-btn">Submit Translation Request</button>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="Admin.js"></script>
+    <script>
+        // Rich text editing functions
+        function formatText(elementId, command, value = null) {
+            const element = document.getElementById(elementId);
+            element.focus();
+            
+            if (command === 'fontSize') {
+                document.execCommand('fontSize', false, '7');
+                const fontElements = element.querySelectorAll('font[size="7"]');
+                fontElements.forEach(fontElement => {
+                    fontElement.removeAttribute('size');
+                    fontElement.style.fontSize = value;
+                });
+            } else {
+                document.execCommand(command, false, value);
+            }
+            
+            updateToolbarState(elementId);
+        }
+        
+        function clearFormatting(elementId) {
+            const element = document.getElementById(elementId);
+            element.focus();
+            document.execCommand('removeFormat', false, null);
+            updateToolbarState(elementId);
+        }
+        
+        function copyText(elementId) {
+            const element = document.getElementById(elementId);
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            try {
+                document.execCommand('copy');
+                showNotification('Text copied to clipboard!', 'success');
+            } catch (err) {
+                showNotification('Failed to copy text', 'error');
+            }
+            
+            selection.removeAllRanges();
+        }
+        
+        function updateToolbarState(elementId) {
+            const toolbarId = elementId === 'originalText' ? 'originalToolbar' : 'translatedToolbar';
+            const toolbar = document.getElementById(toolbarId);
+            
+            // Update button states based on current selection
+            const buttons = toolbar.querySelectorAll('.toolbar-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Check for bold, italic, underline
+            if (document.queryCommandState('bold')) {
+                toolbar.querySelector('[onclick*="bold"]').classList.add('active');
+            }
+            if (document.queryCommandState('italic')) {
+                toolbar.querySelector('[onclick*="italic"]').classList.add('active');
+            }
+            if (document.queryCommandState('underline')) {
+                toolbar.querySelector('[onclick*="underline"]').classList.add('active');
+            }
+        }
+        
+        // Add event listeners for toolbar updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const editableElements = ['originalText', 'translatedText'];
+            editableElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.addEventListener('keyup', () => updateToolbarState(elementId));
+                    element.addEventListener('mouseup', () => updateToolbarState(elementId));
+                }
+            });
+        });
+        
+        // Function to show notification (if not already defined)
+        function showNotification(message, type = 'success') {
+            // Remove any existing notification
+            const existingNotification = document.querySelector('.notification-toast');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `notification-toast ${type}`;
+            notification.innerHTML = `
+                <i class="icon fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                <span class="message">${message}</span>
+                <button class="close">&times;</button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Show notification with animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Add close button functionality
+            const closeBtn = notification.querySelector('.close');
+            closeBtn.addEventListener('click', () => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            });
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

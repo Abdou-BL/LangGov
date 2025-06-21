@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        /* Increase specificity by adding a parent selector */
+        .contact-container {
+            max-width: 800px;
+            margin: 40px auto 60px;
+            padding: 40px;
+            background: linear-gradient(to right, #f2fbe1, #e1f8ba);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 0.6s ease forwards;
+            border: 3px solid var(--primary-green);
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .contact-container .contact-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .contact-container .contact-title {
+            color: var(--primary-green);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .contact-container .contact-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+            border-radius: 2px;
+        }
+
+        .contact-container .contact-subtitle {
+            color: var(--text-medium);
+            font-size: 1.1rem;
+        }
+
+        .contact-container .contact-form {
+            display: grid;
+            gap: 25px;
+        }
+
+        /* Update only these style blocks, keep others the same */
+        
+        .contact-container .form-group {
+            position: relative !important;
+            margin-bottom: 35px !important;
+            /* Add padding to ensure space for floating label */
+            padding-top: 20px !important;
+            /* Add overflow visible to ensure label shows when floating */
+            overflow: visible !important;
+        }
+
+        .contact-container .form-input {
+            width: 100% !important;
+            padding: 25px 16px 15px !important;
+            font-size: 16px !important;
+            color: var(--text-dark) !important;
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 2px solid rgba(45, 90, 61, 0.2) !important;
+            outline: none !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            line-height: 1.2 !important;
+            /* Add z-index to ensure input stays below label */
+            z-index: 1 !important;
+            position: relative !important;
+        }
+
+        .contact-container .form-label {
+            position: absolute;
+            left: 16px;
+            top: 42px; /* Adjusted to account for padding-top */
+            font-size: 16px;
+            color: var(--text-medium);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+            padding: 0 5px;
+            /* Add z-index to ensure label stays above input */
+            z-index: 2;
+        }
+
+        .contact-container .form-input:focus,
+        .contact-container .form-input:not(:placeholder-shown) {
+            border-bottom-color: var(--primary-green) !important;
+            box-shadow: 0 1px 0 0 var(--primary-green) !important;
+        }
+
+        .contact-container .form-input:focus + .form-label,
+        .contact-container .form-input:not(:placeholder-shown) + .form-label {
+            transform: translateY(-180%) scale(0.85);
+            color: var(--primary-green);
+            font-weight: 500;
+            /* Add background color to ensure text is visible */
+            background: linear-gradient(to right, #f2fbe1, #e1f8ba);
+            border-radius: 4px;
+        }
+
+        .contact-container .message-input:focus + .form-label,
+        .contact-container .message-input:not(:placeholder-shown) + .form-label {
+            transform: translateY(-180%) scale(0.85);
+        }
+
+        .contact-container .form-group::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .contact-container .form-group:focus-within::after {
+            width: 100%;
+        }
+
+        /* Adjust message input padding */
+        .contact-container .message-input {
+            min-height: 120px !important;
+            resize: vertical !important;
+            border: 2px solid rgba(45, 90, 61, 0.2) !important;
+            border-radius: 12px !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+            padding: 20px 16px !important;  /* Adjusted padding for textarea */
+        }
+
+        .contact-container .message-input::-webkit-scrollbar {
+            display: none;
+        }
+
+        .contact-container .message-input:focus {
+            border-color: var(--primary-green) !important;
+            box-shadow: 0 0 15px rgba(45, 90, 61, 0.1) !important;
+        }
+
+        .contact-container .form-input:focus {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .contact-container .form-group:hover .form-input {
+            border-bottom-color: rgba(45, 90, 61, 0.4) !important;
+        }
+
+        /* Add success state */
+        .contact-container .form-input.valid {
+            border-bottom-color: #22c55e;
+        }
+
+        .contact-container .form-input.valid + .form-label {
+            color: #22c55e;
+        }
+
+        /* Add error state */
+        .contact-container .form-input.error {
+            border-bottom-color: #ff4444;
+        }
+
+        .contact-container .form-input.error + .form-label {
+            color: #ff4444;
+        }
+
+        .submit-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: fit-content;
+            padding: 15px 40px;
+            background: var(--primary-green);
+            color: white;
+            border: 2px solid var(--primary-green);
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 40px auto 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(45, 90, 61, 0.3);
+            background: var(--secondary-green);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:disabled {
+            background: var(--border-light);
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        /* Loading state animation */
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid white;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Header/Footer adjustments */
+        .header {
+            background: white;
+        }
+
+        .footer {
+            background: var(--dark-gray);
+        }
+
+        .footer-logo {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li><a href="about.html" class="nav-link">About Us</a></li>
+                    <li><a href="people.html" class="nav-link">People</a></li>
+                    <li><a href="services.html" class="nav-link">Services</a></li>
+                    <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="contact-container">
+            <div class="contact-header">
+                <h1 class="contact-title">Contact Us</h1>
+                <p class="contact-subtitle">Get in touch with our team for any inquiries or support</p>
+            </div>
+
+            <form id="contactForm" class="contact-form">
+                <div class="form-group">
+                    <input type="text" class="form-input" id="firstName" placeholder=" " required>
+                    <label class="form-label" for="firstName">First Name</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-input" id="lastName" placeholder=" " required>
+                    <label class="form-label" for="lastName">Last Name</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="email" class="form-input" id="email" placeholder=" " required>
+                    <label class="form-label" for="email">Email Address</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="tel" class="form-input" id="phone" placeholder=" " required>
+                    <label class="form-label" for="phone">Phone Number</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-input" id="company" placeholder=" " required>
+                    <label class="form-label" for="company">Company Name</label>
+                </div>
+
+                <div class="form-group">
+                    <textarea class="form-input message-input" id="message" placeholder=" " required></textarea>
+                    <label class="form-label" for="message">Your Message</label>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">Send Message</span>
+                    <div class="loading-spinner"></div>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+
+            <div class="success-message">
+                <i class="fas fa-check-circle success-icon"></i>
+                <h2>Thank you for contacting us!</h2>
+                <p>We've received your message and will get back to you soon.</p>
+            </div>
+        </div>
+    </main>
+
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="contact.html" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

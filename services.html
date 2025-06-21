@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li><a href="about.html" class="nav-link">About Us</a></li>
+                    <li><a href="people.html" class="nav-link">People</a></li>
+                    <li class="services-nav">
+                        <a href="services.html" class="nav-link">Services</a>
+                        <div class="services-dropdown">
+                            <a href="#document-translation" class="dropdown-item" onclick="scrollToService('document-translation', event)">
+                                <i class="fas fa-file-alt"></i>
+                                Document Translation
+                            </a>
+                            <a href="#online-courses" class="dropdown-item" onclick="scrollToService('online-courses', event)">
+                                <i class="fas fa-graduation-cap"></i>
+                                Online Courses
+                            </a>
+                            <a href="#correspondence" class="dropdown-item" onclick="scrollToService('correspondence', event)">
+                                <i class="fas fa-globe"></i>
+                                International Correspondence
+                            </a>
+                            <a href="#consulting" class="dropdown-item" onclick="scrollToService('consulting', event)">
+                                <i class="fas fa-comments"></i>
+                                Language Consulting
+                            </a>
+                            <a href="#terminology" class="dropdown-item" onclick="scrollToService('terminology', event)">
+                                <i class="fas fa-book"></i>
+                                Terminology Bank
+                            </a>
+                        </div>
+                    </li>
+                    <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="services" id="services">
+            <div class="container" style="text-align: center;">
+                <h2 class="section-title">LangGov Services</h2>
+                <div class="services-grid">
+                    <div class="service-card" id="document-translation">
+                        <div class="service-icon">
+                            <img src="photo_2025-06-04_17-23-10 (2).jpg" alt="Document Translation" class="service-icon-img">
+                        </div>
+                        <div class="service-content">
+                            <h3 class="service-title">Administrative Document Translation</h3>
+                            <div class="service-description">Submit and receive high-quality translations of official documents adapted to administrative standards. This service includes terminology, consistency, translation suggestions, and internal use of AI-supported tools to enhance speed and accuracy.</div>
+                        </div>
+                        <div class="service-btn-container">
+                            <button onclick="checkAuthAndRedirect('document-translation.html')" class="service-btn">Go</button>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card" id="online-courses">
+                        <div class="service-icon">
+                            <img src="online-courses.jpg" alt="Online Courses" class="service-icon-img">
+                        </div>
+                        <div class="service-content">
+                            <h3 class="service-title">Online English Courses for Officials</h3>
+                            <div class="service-description">Access customized English learning paths designed for public service professionals.</div>
+                        </div>
+                        <div class="service-btn-container">
+                            <button onclick="checkAuthAndRedirect('online-courses.html')" class="service-btn">Go</button>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card" id="correspondence">
+                        <div class="service-icon">
+                            <img src="5911461715290213004.jpg" alt="International Correspondence" class="service-icon-img">
+                        </div>
+                        <div class="service-content">
+                            <h3 class="service-title">International Correspondence Support</h3>
+                            <div class="service-description">Get assistance in drafting and reviewing international administrative emails and letters</div>
+                        </div>
+                        <div class="service-btn-container">
+                            <button onclick="checkAuthAndRedirect('inter.html')" class="service-btn">Go</button>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card" id="consulting">
+                        <div class="service-icon">
+                            <img src="5911461715290213002.jpg" alt="Transition Consulting" class="service-icon-img">
+                        </div>
+                        <div class="service-content">
+                            <h3 class="service-title">Language Transition Consulting</h3>
+                            <div class="service-description">Receive strategic guidance and planning tools to lead a smooth linguistic shift in your department</div>
+                        </div>
+                        <div class="service-btn-container">
+                            <button onclick="checkAuthAndRedirect('consult.html')" class="service-btn">Go</button>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card" id="terminology">
+                        <div class="service-icon">
+                            <img src="photo_2025-06-04_17-23-10.jpg" alt="Terminology Bank" class="service-icon-img">
+                        </div>
+                        <div class="service-content">
+                            <h3 class="service-title">Terminology Bank</h3>
+                            <div class="service-description">Search official bilingual terms to ensure accuracy and consistency in translation</div>
+                        </div>
+                        <div class="service-btn-container">
+                            <button onclick="checkAuthAndRedirect('bank.html')" class="service-btn">Go</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="contact.html" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+
+    <script>
+function scrollToService(serviceId, event) {
+    event.preventDefault();
+    
+    const targetSection = document.getElementById(serviceId);
+    if (!targetSection) return;
+
+    // Scroll to the section
+    targetSection.scrollIntoView({ behavior: 'smooth' });
+
+    // Apply highlight effect to target section
+    targetSection.classList.add('highlight-active');
+
+    // Apply blur effect to other sections
+    document.querySelectorAll('.service-card').forEach(card => {
+        if (card.id !== serviceId) {
+            card.classList.add('blur-active');
+        }
+    });
+
+    // Remove effects after animation completes
+    setTimeout(() => {
+        targetSection.classList.remove('highlight-active');
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.classList.remove('blur-active');
+        });
+    }, 2500); // Match the animation duration
+}
+
+// Add initial check for services page
+document.addEventListener('DOMContentLoaded', function() {
+    const servicesDropdown = document.querySelector('.services-dropdown');
+    const isServicesPage = window.location.pathname.includes('services.html');
+    
+    if (servicesDropdown) {
+        if (isServicesPage) {
+            servicesDropdown.style.display = 'none';
+            document.querySelector('.services-nav').addEventListener('mouseenter', () => {
+                servicesDropdown.style.display = 'block';
+            });
+            document.querySelector('.services-nav').addEventListener('mouseleave', () => {
+                servicesDropdown.style.display = 'none';
+            });
+        } else {
+            servicesDropdown.style.display = 'none';
+        }
+    }
+});
+    </script>
+</body>
+</html>

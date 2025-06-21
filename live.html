@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Sessions - LangGov Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        .live-container {
+            max-width: 1400px;
+            margin: 20px auto 60px;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .access-denied {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-medium);
+        }
+
+        .access-denied h2 {
+            color: #ff4444;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .page-title {
+            color: var(--primary-green);
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-green);
+        }
+
+        .live-sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .session-card {
+            background: linear-gradient(135deg, #f2fbe1 0%, #e8f5e8 100%);
+            border: 2px solid var(--primary-green);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .session-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff4444, #ff6b6b);
+            animation: livePulse 2s infinite;
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .session-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(45, 90, 61, 0.2);
+        }
+
+        .session-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .session-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-green);
+            object-fit: cover;
+        }
+
+        .session-info h3 {
+            color: var(--primary-green);
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .session-time {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .session-topic {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 15px 0;
+            flex-grow: 1;
+        }
+
+        .session-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 15px;
+        }
+
+        .member-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-medium);
+            font-weight: 500;
+        }
+
+        .member-count i {
+            color: var(--primary-green);
+        }
+
+        .join-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .join-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+            background: var(--secondary-green);
+        }
+
+        .start-live-section {
+            background: linear-gradient(135deg, var(--light-beige) 0%, var(--beige) 100%);
+            border: 2px solid var(--primary-green);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .start-live-title {
+            color: var(--primary-green);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .live-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 90, 61, 0.3);
+        }
+
+        .live-interface {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            z-index: 1000;
+        }
+
+        .live-interface.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .live-header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .live-topic {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .live-indicator {
+            background: #ff4444;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            animation: livePulse 2s infinite;
+        }
+
+        .live-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            max-height: calc(100vh - 200px);
+            overflow: hidden;
+        }
+
+        .host-video-container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            max-height: 400px;
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .host-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-green);
+        }
+
+        .host-name {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .video-element {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            max-height: 350px;
+            border-radius: 15px;
+            background: #000;
+            object-fit: contain;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .participants-section {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .participants-title {
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .participants-grid {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .participant-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 25px;
+            color: white;
+        }
+
+        .participant-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-green);
+        }
+
+        .controls-panel {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            bottom: 0;
+            z-index: 1001;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .control-btn.camera {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .control-btn.camera.off {
+            background: #ff4444;
+        }
+
+        .control-btn.mic {
+            background: #2196F3;
+            color: white;
+        }
+
+        .control-btn.mic.off {
+            background: #ff4444;
+        }
+
+        .control-btn.screen {
+            background: #FF9800;
+            color: white;
+        }
+
+        .control-btn.end {
+            background: #ff4444;
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-medium);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--border-light);
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-light);
+            border-top: 3px solid var(--primary-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .viewer-interface {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            z-index: 1000;
+        }
+
+        .viewer-interface.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            max-height: calc(100vh - 200px);
+            overflow: hidden;
+        }
+
+        .stream-container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            max-height: 400px;
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remote-video {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            max-height: 350px;
+            border-radius: 15px;
+            background: #000;
+            object-fit: contain;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .connecting-state {
+            color: white;
+            text-align: center;
+        }
+
+        .connecting-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .viewer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            bottom: 0;
+            z-index: 1001;
+        }
+
+        .leave-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .leave-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .live-form {
+                flex-direction: column;
+            }
+
+            .controls-panel {
+                gap: 10px;
+            }
+
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Hide profile icon on live page */
+        .header-icons {
+            display: none;
+        }
+
+        /* Hide footer on live page */
+        .footer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li><a href="main.html#about" class="nav-link">About Us</a></li>
+                    <li><a href="main.html#services" class="nav-link">Services</a></li>
+                    <li><a href="main.html#footer" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="live-container">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Access Denied State -->
+            <div id="accessDenied" class="access-denied" style="display: none;">
+                <h2><i class="fas fa-lock"></i> Access Denied</h2>
+                <p>Please sign in to access live sessions.</p>
+                <a href="main.html" class="btn btn-primary">Return to Home</a>
+            </div>
+
+            <!-- Main Dashboard -->
+            <div id="dashboard" style="display: none;">
+                <div class="dashboard-header">
+                    <h1 class="page-title">Live Sessions</h1>
+                    <div class="admin-info">
+                        <img id="adminAvatar" src="" alt="Admin" class="admin-avatar">
+                        <div>
+                            <div id="adminName" style="font-weight: 600; color: var(--primary-green);"></div>
+                            <div style="font-size: 0.9rem; color: var(--text-medium);">Administrator</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Start New Live Section -->
+                <div class="start-live-section">
+                    <h2 class="start-live-title">
+                        <i class="fas fa-video"></i> Start New Live Session
+                    </h2>
+                    <form class="live-form" id="startLiveForm">
+                        <div class="form-group">
+                            <label class="form-label" for="topicInput">Session Topic</label>
+                            <input type="text" id="topicInput" class="form-input" placeholder="Enter the topic for your live session..." required>
+                        </div>
+                        <button type="submit" class="start-btn">
+                            <i class="fas fa-broadcast-tower"></i> Start Live
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Active Live Sessions -->
+                <div>
+                    <h2 style="color: var(--primary-green); margin-bottom: 20px;">
+                        <i class="fas fa-circle" style="color: #ff4444;"></i> Active Live Sessions
+                    </h2>
+                    <div id="liveSessionsGrid" class="live-sessions-grid">
+                        <!-- Sessions will be populated here -->
+                    </div>
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <i class="fas fa-video-slash"></i>
+                        <h3>No Active Sessions</h3>
+                        <p>Start a new live session to begin engaging with your audience.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Viewer Interface -->
+        <div id="viewerInterface" class="viewer-interface">
+            <div class="viewer-header">
+                <div class="live-topic" id="viewerTopic"></div>
+                <div class="live-indicator">
+                    <i class="fas fa-circle"></i> LIVE
+                </div>
+            </div>
+
+            <div class="viewer-main">
+                <div class="stream-container">
+                    <video id="remoteVideo" class="remote-video" autoplay playsinline style="display: none;"></video>
+                    <div id="connectingState" class="connecting-state">
+                        <div class="connecting-spinner"></div>
+                        <h3>Connecting to live stream...</h3>
+                        <p>Please wait while we connect you to the session.</p>
+                    </div>
+                    <div id="hostProfileViewer" style="display: none;">
+                        <img id="hostAvatarViewer" src="" alt="Host" class="host-avatar-large">
+                        <div class="host-name" id="hostNameViewer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="participants-section">
+                <div class="participants-title">
+                    <i class="fas fa-users"></i> Viewers (<span id="viewerCount">0</span>)
+                </div>
+                <div id="viewersGrid" class="participants-grid">
+                    <!-- Viewers will be populated here -->
+                </div>
+            </div>
+
+            <div class="viewer-controls">
+                <button id="leaveStream" class="leave-btn">
+                    <i class="fas fa-sign-out-alt"></i> Leave Stream
+                </button>
+            </div>
+        </div>
+
+        <!-- Live Interface -->
+        <div id="liveInterface" class="live-interface">
+            <div class="live-header">
+                <div class="live-topic" id="currentTopic"></div>
+                <div class="live-indicator">
+                    <i class="fas fa-circle"></i> LIVE
+                </div>
+            </div>
+
+            <div class="live-main">
+                <div class="host-video-container">
+                    <video id="hostVideo" class="video-element" autoplay muted style="display: none;"></video>
+                    <div id="hostProfile">
+                        <img id="hostAvatar" src="" alt="Host" class="host-avatar-large">
+                        <div class="host-name" id="hostName"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="participants-section">
+                <div class="participants-title">
+                    <i class="fas fa-users"></i> Participants (<span id="participantCount">0</span>)
+                </div>
+                <div id="participantsGrid" class="participants-grid">
+                    <!-- Participants will be populated here -->
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <button id="toggleMic" class="control-btn mic" title="Toggle Microphone">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="shareScreen" class="control-btn screen" title="Share Screen">
+                    <i class="fas fa-desktop"></i>
+                </button>
+                <button id="endLive" class="control-btn end" title="End Live Session">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Add check to prevent automatic access to live page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user came here intentionally (not from browser back/forward or direct URL)
+            const referrer = document.referrer;
+            const isFromLangGov = referrer.includes(window.location.origin) || referrer.includes('langgov');
+            
+            // If no referrer or not from our site, and no specific live session in URL, redirect to main
+            if (!isFromLangGov && !window.location.search.includes('session=')) {
+                console.log('Redirecting to main page - no valid referrer');
+                window.location.href = 'main.html';
+                return;
+            }
+            
+            // Clear any persistent live session data on page load
+            sessionStorage.removeItem('redirectToLive');
+            sessionStorage.removeItem('isInLiveSession');
+        });
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7A0JxXYHnzQ_LzDBB5SmXbKl-bCv2ZPI",
+            authDomain: "langgov-bf3b8.firebaseapp.com",
+            projectId: "langgov-bf3b8",
+            storageBucket: "langgov-bf3b8.firebasestorage.app",
+            messagingSenderId: "240928957703",
+            appId: "1:240928957703:web:b2e50595e71a2ec966d1a2"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Global variables
+        let currentUser = null;
+        let currentLiveId = null;
+        let mediaStream = null;
+        let livesListener = null;
+        let currentLiveListener = null;
+        let viewersListener = null;
+        let signalingListener = null;
+        let peerConnection = null;
+        let isHost = false;
+        let currentViewingLiveId = null;
+
+        // WebRTC configuration
+        const rtcConfiguration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        // DOM elements
+        const loadingState = document.getElementById('loadingState');
+        const accessDenied = document.getElementById('accessDenied');
+        const dashboard = document.getElementById('dashboard');
+        const liveInterface = document.getElementById('liveInterface');
+        const viewerInterface = document.getElementById('viewerInterface');
+        const startLiveForm = document.getElementById('startLiveForm');
+        const liveSessionsGrid = document.getElementById('liveSessionsGrid');
+        const emptyState = document.getElementById('emptyState');
+
+        // Initialize the page
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await checkAccess();
+            } else {
+                // If not authenticated, redirect to main instead of showing access denied
+                console.log('No user authenticated, redirecting to main');
+                window.location.href = 'main.html';
+            }
+        });
+
+        async function checkAccess() {
+            try {
+                // Check both admins and users collections
+                const [adminDoc, userDoc] = await Promise.all([
+                    db.collection('admins').doc(currentUser.uid).get(),
+                    db.collection('users').doc(currentUser.uid).get()
+                ]);
+
+                const userData = adminDoc.exists ? adminDoc.data() : (userDoc.exists ? userDoc.data() : null);
+
+                if (userData) {
+                    await initializeDashboard(userData);
+                } else {
+                    showAccessDenied();
+                }
+            } catch (error) {
+                console.error('Error checking access:', error);
+                showAccessDenied();
+            }
+        }
+
+        function showAccessDenied() {
+            loadingState.style.display = 'none';
+            accessDenied.style.display = 'block';
+            dashboard.style.display = 'none';
+        }
+
+        async function initializeDashboard(userData) {
+            loadingState.style.display = 'none';
+            dashboard.style.display = 'block';
+
+            // Set admin info
+            document.getElementById('adminAvatar').src = currentUser.photoURL || 'https://via.placeholder.com/50';
+            document.getElementById('adminName').textContent = userData.firstName && userData.lastName ? 
+                `${userData.firstName} ${userData.lastName}` : currentUser.displayName || 'User';
+
+            // Show/hide admin controls based on account type
+            const startLiveSection = document.querySelector('.start-live-section');
+            if (userData.accountType === 'Administrative') {
+                startLiveSection.style.display = 'block';
+                // Set up form handler for admins
+                startLiveForm.addEventListener('submit', handleStartLive);
+            } else {
+                startLiveSection.style.display = 'none';
+            }
+
+            // Listen for live sessions immediately
+            setTimeout(() => {
+                listenToLiveSessions();
+            }, 500); // Small delay to ensure UI is ready
+
+            // Set up live interface controls
+            setupLiveControls();
+            setupViewerControls();
+        }
+
+        function listenToLiveSessions() {
+            if (livesListener) livesListener();
+            
+            livesListener = db.collection('lives')
+                .where('isLive', '==', true)
+                .orderBy('startedAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    console.log('Live sessions updated:', snapshot.docs.length);
+                    const activeSessions = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    console.log('Active sessions:', activeSessions);
+                    renderLiveSessions(activeSessions);
+                }, (error) => {
+                    console.error('Error listening to live sessions:', error);
+                    // If orderBy fails due to missing index, try without orderBy
+                    if (error.code === 'failed-precondition') {
+                        console.log('Retrying without orderBy due to missing index...');
+                        listenToLiveSessionsWithoutOrder();
+                    }
+                });
+        }
+
+        function listenToLiveSessionsWithoutOrder() {
+            if (livesListener) livesListener();
+            
+            livesListener = db.collection('lives')
+                .where('isLive', '==', true)
+                .onSnapshot((snapshot) => {
+                    console.log('Live sessions updated (no order):', snapshot.docs.length);
+                    const activeSessions = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    // Sort manually by startedAt
+                    activeSessions.sort((a, b) => {
+                        const aTime = a.startedAt ? a.startedAt.toDate() : new Date(0);
+                        const bTime = b.startedAt ? b.startedAt.toDate() : new Date(0);
+                        return bTime - aTime;
+                    });
+                    console.log('Active sessions (manual sort):', activeSessions);
+                    renderLiveSessions(activeSessions);
+                }, (error) => {
+                    console.error('Error listening to live sessions (no order):', error);
+                });
+        }
+
+        function renderLiveSessions(sessions) {
+            const liveSessionsGrid = document.getElementById('liveSessionsGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            console.log('Rendering sessions:', sessions.length);
+            liveSessionsGrid.innerHTML = '';
+            
+            if (sessions.length === 0) {
+                emptyState.style.display = 'block';
+                liveSessionsGrid.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            liveSessionsGrid.style.display = 'grid';
+            
+            sessions.forEach((session) => {
+                const sessionCard = createSessionCard(session.id, session);
+                liveSessionsGrid.appendChild(sessionCard);
+            });
+        }
+
+        function createSessionCard(sessionId, session) {
+            const card = document.createElement('div');
+            card.className = 'session-card';
+            
+            const startTime = session.startedAt ? session.startedAt.toDate() : new Date();
+            const timeAgo = getTimeAgo(startTime);
+            const memberCount = session.members ? session.members.length : 0;
+            
+            card.innerHTML = `
+                <div class="session-header">
+                    <img src="${session.adminImage || 'https://via.placeholder.com/50'}" 
+                         alt="${session.adminName || 'Admin'}" 
+                         class="session-avatar"
+                         onerror="this.src='https://via.placeholder.com/50'">
+                    <div class="session-info">
+                        <h3>${session.adminName || 'Anonymous Admin'}</h3>
+                        <div class="session-time">Started ${timeAgo}</div>
+                    </div>
+                </div>
+                <div class="session-topic">${session.topic || 'No topic specified'}</div>
+                <div class="session-stats">
+                    <div class="member-count">
+                        <i class="fas fa-users"></i>
+                        <span>${memberCount} viewer${memberCount !== 1 ? 's' : ''}</span>
+                    </div>
+                    <button class="join-btn" onclick="joinLive('${sessionId}')">
+                        <i class="fas fa-play"></i> Join Live
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours}h ago`;
+            
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays}d ago`;
+        }
+
+        async function handleStartLive(e) {
+            e.preventDefault();
+            
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) return;
+
+            try {
+                // Request microphone access only
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: false,
+                    audio: true
+                });
+
+                // Get user data for live session
+                const [adminDoc, userDoc] = await Promise.all([
+                    db.collection('admins').doc(currentUser.uid).get(),
+                    db.collection('users').doc(currentUser.uid).get()
+                ]);
+
+                const userData = adminDoc.exists ? adminDoc.data() : userDoc.data();
+
+                // Create live session document
+                const liveData = {
+                    adminId: currentUser.uid,
+                    adminName: userData.firstName && userData.lastName ? 
+                        `${userData.firstName} ${userData.lastName}` : currentUser.displayName || 'Admin',
+                    adminImage: currentUser.photoURL || 'https://via.placeholder.com/120',
+                    topic: topic,
+                    startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    members: [],
+                    viewers: {},
+                    isLive: true
+                };
+
+                console.log('Creating live session with data:', liveData);
+                const docRef = await db.collection('lives').add(liveData);
+                currentLiveId = docRef.id;
+                isHost = true;
+                console.log('Live session created with ID:', currentLiveId);
+
+                // Show live interface
+                showLiveInterface(liveData);
+                
+                // Clear form
+                startLiveForm.reset();
+
+            } catch (error) {
+                console.error('Error starting live session:', error);
+                alert('Failed to start live session. Please check microphone permissions.');
+            }
+        }
+
+        function showLiveInterface(liveData) {
+            dashboard.style.display = 'none';
+            liveInterface.classList.add('active');
+
+            // Set live interface data
+            document.getElementById('currentTopic').textContent = liveData.topic;
+            document.getElementById('hostAvatar').src = liveData.adminImage;
+            document.getElementById('hostName').textContent = liveData.adminName;
+
+            // Set up video stream - show profile since no camera
+            const hostVideo = document.getElementById('hostVideo');
+            hostVideo.style.display = 'none';
+            document.getElementById('hostProfile').style.display = 'block';
+
+            // Listen for participants
+            listenToCurrentLive();
+        }
+
+        function listenToCurrentLive() {
+            if (!currentLiveId) return;
+            
+            if (currentLiveListener) currentLiveListener();
+            
+            currentLiveListener = db.collection('lives').doc(currentLiveId)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        // Update both participants display methods
+                        updateParticipants(data.members || []);
+                        updateViewersDisplay(data.viewers || {});
+                    }
+                });
+        }
+
+        function updateParticipants(members) {
+            const participantsGrid = document.getElementById('participantsGrid');
+            const participantCount = document.getElementById('participantCount');
+            
+            // Count both members array and viewers object
+            const viewersCount = Object.keys(document.getElementById('viewersGrid')?.dataset?.viewers ? JSON.parse(document.getElementById('viewersGrid').dataset.viewers) : {}).length;
+            const totalCount = Math.max(members.length, viewersCount);
+            
+            participantCount.textContent = totalCount;
+            participantsGrid.innerHTML = '';
+            
+            members.forEach((member) => {
+                const participantCard = document.createElement('div');
+                participantCard.className = 'participant-card';
+                participantCard.innerHTML = `
+                    <img src="${member.profileImage || 'https://via.placeholder.com/30'}" alt="${member.name}" class="participant-avatar">
+                    <span>${member.name}</span>
+                `;
+                participantsGrid.appendChild(participantCard);
+            });
+        }
+
+        function updateViewersDisplay(viewers) {
+            const viewersGrid = document.getElementById('viewersGrid');
+            const viewerCount = document.getElementById('viewerCount');
+            
+            const viewersList = Object.values(viewers);
+            console.log('Updating viewers display:', viewersList);
+            viewerCount.textContent = viewersList.length;
+            
+            // Store viewers data for cross-reference
+            if (viewersGrid) {
+                viewersGrid.dataset.viewers = JSON.stringify(viewers);
+            }
+            
+            // Update viewers grid
+            if (viewersGrid) {
+                viewersGrid.innerHTML = '';
+                
+                viewersList.forEach((viewer) => {
+                    const viewerCard = document.createElement('div');
+                    viewerCard.className = 'participant-card';
+                    viewerCard.innerHTML = `
+                        <img src="${viewer.profileImage || 'https://via.placeholder.com/30'}" 
+                             alt="${viewer.name}" 
+                             class="participant-avatar"
+                             onerror="this.src='https://via.placeholder.com/30'">
+                        <span>${viewer.name}</span>
+                    `;
+                    viewersGrid.appendChild(viewerCard);
+                });
+            }
+            
+            // Also update host participants grid if we're the host
+            const participantsGrid = document.getElementById('participantsGrid');
+            const participantCount = document.getElementById('participantCount');
+            
+            if (participantsGrid && isHost) {
+                participantCount.textContent = viewersList.length;
+                participantsGrid.innerHTML = '';
+                
+                viewersList.forEach((viewer) => {
+                    const participantCard = document.createElement('div');
+                    participantCard.className = 'participant-card';
+                    participantCard.innerHTML = `
+                        <img src="${viewer.profileImage || 'https://via.placeholder.com/30'}" 
+                             alt="${viewer.name}" 
+                             class="participant-avatar"
+                             onerror="this.src='https://via.placeholder.com/30'">
+                        <span>${viewer.name}</span>
+                    `;
+                    participantsGrid.appendChild(participantCard);
+                });
+            }
+        }
+
+        async function joinLive(sessionId) {
+            try {
+                console.log('Joining live session:', sessionId);
+                currentViewingLiveId = sessionId;
+                
+                // Get live session data
+                const liveDoc = await db.collection('lives').doc(sessionId).get();
+                if (!liveDoc.exists) {
+                    alert('Live session not found.');
+                    return;
+                }
+                
+                const liveData = liveDoc.data();
+                
+                // Get current user data
+                const [adminDoc, userDoc] = await Promise.all([
+                    db.collection('admins').doc(currentUser.uid).get(),
+                    db.collection('users').doc(currentUser.uid).get()
+                ]);
+                
+                const userData = adminDoc.exists ? adminDoc.data() : userDoc.data();
+                const userName = userData.firstName && userData.lastName ? 
+                    `${userData.firstName} ${userData.lastName}` : currentUser.displayName || 'User';
+                
+                // Show viewer interface first
+                showViewerInterface(liveData);
+                
+                // Add to viewers list in Firebase with proper data structure
+                const viewerData = {
+                    name: userName,
+                    profileImage: currentUser.photoURL || userData.profileImage || 'https://via.placeholder.com/30',
+                    joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    uid: currentUser.uid
+                };
+                
+                // Also add to members array for backward compatibility
+                const memberData = {
+                    name: userName,
+                    profileImage: currentUser.photoURL || userData.profileImage || 'https://via.placeholder.com/30',
+                    uid: currentUser.uid
+                };
+                
+                // Update both viewers object and members array
+                await db.collection('lives').doc(sessionId).update({
+                    [`viewers.${currentUser.uid}`]: viewerData,
+                    members: firebase.firestore.FieldValue.arrayUnion(memberData)
+                });
+                
+                console.log('Added to viewers list and members array:', viewerData);
+                
+                // Start WebRTC as viewer
+                await initializeViewerWebRTC(sessionId);
+                
+            } catch (error) {
+                console.error('Error joining live session:', error);
+                alert('Failed to join live session. Please try again.');
+            }
+        }
+
+        function showViewerInterface(liveData) {
+            dashboard.style.display = 'none';
+            viewerInterface.classList.add('active');
+
+            // Set viewer interface data
+            document.getElementById('viewerTopic').textContent = liveData.topic;
+            document.getElementById('hostAvatarViewer').src = liveData.adminImage;
+            document.getElementById('hostNameViewer').textContent = liveData.adminName;
+
+            // Listen for viewers updates
+            listenToViewers();
+        }
+
+        async function initializeViewerWebRTC(sessionId) {
+            try {
+                console.log('Initializing viewer WebRTC for session:', sessionId);
+                
+                // Create peer connection for viewer
+                peerConnection = new RTCPeerConnection(rtcConfiguration);
+                
+                // Handle incoming stream from host
+                peerConnection.ontrack = (event) => {
+                    console.log('Received remote stream');
+                    const [remoteStream] = event.streams;
+                    const remoteVideo = document.getElementById('remoteVideo');
+                    remoteVideo.srcObject = remoteStream;
+                    
+                    // Show video and hide connecting state
+                    document.getElementById('connectingState').style.display = 'none';
+                    remoteVideo.style.display = 'block';
+                    document.getElementById('hostProfileViewer').style.display = 'none';
+                    
+                    // Show success notification
+                    showNotification('Successfully connected to live stream!', 'success');
+                };
+                
+                // Handle ICE candidates
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        console.log('Sending ICE candidate from viewer');
+                        db.collection('lives').doc(sessionId).collection('signaling').add({
+                            type: 'candidate',
+                            candidate: event.candidate.toJSON(),
+                            from: currentUser.uid,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                };
+                
+                // Monitor connection state
+                peerConnection.onconnectionstatechange = () => {
+                    console.log('Connection state:', peerConnection.connectionState);
+                    if (peerConnection.connectionState === 'connected') {
+                        console.log('WebRTC connection established');
+                        showNotification('Connection established!', 'success');
+                        // Hide connecting state if still showing
+                        document.getElementById('connectingState').style.display = 'none';
+                        document.getElementById('hostProfileViewer').style.display = 'block';
+                    } else if (peerConnection.connectionState === 'failed') {
+                        console.error('WebRTC connection failed');
+                        showNotification('Connection failed. Showing host profile instead.', 'error');
+                        // Show host profile as fallback
+                        document.getElementById('connectingState').style.display = 'none';
+                        document.getElementById('hostProfileViewer').style.display = 'block';
+                    } else if (peerConnection.connectionState === 'connecting') {
+                        console.log('Connecting to host...');
+                    }
+                };
+                
+                // Listen for signaling messages
+                listenForSignaling(sessionId);
+                
+                // Request offer from host
+                await db.collection('lives').doc(sessionId).collection('signaling').add({
+                    type: 'request-offer',
+                    from: currentUser.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                console.log('Sent request-offer to host');
+                
+            } catch (error) {
+                console.error('Error initializing viewer WebRTC:', error);
+                showNotification('Failed to initialize connection. Please try again.', 'error');
+                // Show host profile as fallback
+                document.getElementById('connectingState').style.display = 'none';
+                document.getElementById('hostProfileViewer').style.display = 'block';
+            }
+        }
+
+        function listenForSignaling(sessionId) {
+            if (signalingListener) signalingListener();
+            
+            signalingListener = db.collection('lives').doc(sessionId).collection('signaling')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot(async (snapshot) => {
+                    snapshot.docChanges().forEach(async (change) => {
+                        if (change.type === 'added') {
+                            const data = change.doc.data();
+                            
+                            // Skip our own messages
+                            if (data.from === currentUser.uid) return;
+                            
+                            console.log('Received signaling message:', data.type, 'from:', data.from);
+                            
+                            try {
+                                if (data.type === 'offer') {
+                                    console.log('Processing offer from host');
+                                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                                    
+                                    const answer = await peerConnection.createAnswer();
+                                    await peerConnection.setLocalDescription(answer);
+                                    
+                                    // Send answer back to host
+                                    await db.collection('lives').doc(sessionId).collection('signaling').add({
+                                        type: 'answer',
+                                        answer: answer,
+                                        to: data.from,
+                                        from: currentUser.uid,
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+                                    
+                                    console.log('Sent answer to host');
+                                    
+                                } else if (data.type === 'candidate') {
+                                    console.log('Processing ICE candidate');
+                                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                                }
+                            } catch (error) {
+                                console.error('Error handling signaling message:', error);
+                            }
+                        }
+                    });
+                }, (error) => {
+                    console.error('Error listening to signaling:', error);
+                    // Fallback without orderBy if index doesn't exist
+                    if (error.code === 'failed-precondition') {
+                        listenForSignalingWithoutOrder(sessionId);
+                    }
+                });
+        }
+
+        function listenForSignalingWithoutOrder(sessionId) {
+            if (signalingListener) signalingListener();
+            
+            signalingListener = db.collection('lives').doc(sessionId).collection('signaling')
+                .onSnapshot(async (snapshot) => {
+                    snapshot.docChanges().forEach(async (change) => {
+                        if (change.type === 'added') {
+                            const data = change.doc.data();
+                            
+                            // Skip our own messages
+                            if (data.from === currentUser.uid) return;
+                            
+                            console.log('Received signaling message (no order):', data.type, 'from:', data.from);
+                            
+                            try {
+                                if (data.type === 'offer') {
+                                    console.log('Processing offer from host');
+                                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                                    
+                                    const answer = await peerConnection.createAnswer();
+                                    await peerConnection.setLocalDescription(answer);
+                                    
+                                    // Send answer back to host
+                                    await db.collection('lives').doc(sessionId).collection('signaling').add({
+                                        type: 'answer',
+                                        answer: answer,
+                                        to: data.from,
+                                        from: currentUser.uid,
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+                                    
+                                    console.log('Sent answer to host');
+                                    
+                                } else if (data.type === 'candidate') {
+                                    console.log('Processing ICE candidate');
+                                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                                }
+                            } catch (error) {
+                                console.error('Error handling signaling message:', error);
+                            }
+                        }
+                    });
+                });
+        }
+
+        function listenToViewers() {
+            if (!currentViewingLiveId) return;
+            
+            if (viewersListener) viewersListener();
+            
+            viewersListener = db.collection('lives').doc(currentViewingLiveId)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        console.log('Viewers data updated:', data.viewers);
+                        updateViewersDisplay(data.viewers || {});
+                    }
+                });
+        }
+
+        async function leaveStreamAsViewer() {
+            try {
+                // Remove from both viewers list and members array
+                if (currentViewingLiveId) {
+                    const liveRef = db.collection('lives').doc(currentViewingLiveId);
+                    
+                    // Get current data to find our member entry
+                    const liveDoc = await liveRef.get();
+                    if (liveDoc.exists) {
+                        const data = liveDoc.data();
+                        const updatedMembers = (data.members || []).filter(member => member.uid !== currentUser.uid);
+                        
+                        await liveRef.update({
+                            [`viewers.${currentUser.uid}`]: firebase.firestore.FieldValue.delete(),
+                            members: updatedMembers
+                        });
+                    }
+                    
+                    console.log('Removed from viewers list and members array');
+                }
+                
+                // Clean up WebRTC
+                if (peerConnection) {
+                    peerConnection.close();
+                    peerConnection = null;
+                }
+                
+                // Clean up listeners
+                if (viewersListener) {
+                    viewersListener();
+                    viewersListener = null;
+                }
+                
+                if (signalingListener) {
+                    signalingListener();
+                    signalingListener = null;
+                }
+                
+                // Reset state
+                currentViewingLiveId = null;
+                
+                // Show dashboard
+                viewerInterface.classList.remove('active');
+                dashboard.style.display = 'block';
+                
+                showNotification('Left the live stream', 'success');
+                
+            } catch (error) {
+                console.error('Error leaving stream:', error);
+            }
+        }
+
+        function setupViewerControls() {
+            const leaveStream = document.getElementById('leaveStream');
+            
+            leaveStream.addEventListener('click', () => {
+                leaveStreamAsViewer();
+            });
+        }
+
+        function setupLiveControls() {
+            const toggleMic = document.getElementById('toggleMic');
+            const shareScreen = document.getElementById('shareScreen');
+            const endLive = document.getElementById('endLive');
+
+            toggleMic.addEventListener('click', () => {
+                if (mediaStream) {
+                    const audioTrack = mediaStream.getAudioTracks()[0];
+                    if (audioTrack) {
+                        audioTrack.enabled = !audioTrack.enabled;
+                        toggleMic.classList.toggle('off', !audioTrack.enabled);
+                    }
+                }
+            });
+
+            shareScreen.addEventListener('click', async () => {
+                if (shareScreen.innerHTML.includes('fa-stop')) {
+                    // Stop screen sharing
+                    stopScreenShare();
+                } else {
+                    // Start screen sharing
+                    await startScreenShare();
+                }
+            });
+
+            endLive.addEventListener('click', () => {
+                if (confirm('Are you sure you want to end this live session?')) {
+                    endLiveSession();
+                }
+            });
+        }
+
+        async function startScreenShare() {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true,
+                    audio: true
+                });
+                
+                const hostVideo = document.getElementById('hostVideo');
+                const hostProfile = document.getElementById('hostProfile');
+                
+                // Show video element and hide profile
+                hostVideo.srcObject = screenStream;
+                hostVideo.style.display = 'block';
+                hostProfile.style.display = 'none';
+                
+                // Update button state
+                const shareScreen = document.getElementById('shareScreen');
+                shareScreen.innerHTML = '<i class="fas fa-stop"></i>';
+                shareScreen.title = 'Stop Screen Share';
+                shareScreen.style.background = '#ff4444';
+                
+                // Start WebRTC broadcasting to viewers
+                await broadcastToViewers(screenStream);
+                
+                screenStream.getVideoTracks()[0].onended = () => {
+                    stopScreenShare();
+                };
+                
+            } catch (error) {
+                console.error('Error sharing screen:', error);
+            }
+        }
+
+        function stopScreenShare() {
+            const hostVideo = document.getElementById('hostVideo');
+            const hostProfile = document.getElementById('hostProfile');
+            const shareScreen = document.getElementById('shareScreen');
+            
+            // Switch back to profile
+            hostVideo.style.display = 'none';
+            hostProfile.style.display = 'flex';
+            
+            // Reset button state
+            shareScreen.innerHTML = '<i class="fas fa-desktop"></i>';
+            shareScreen.title = 'Share Screen';
+            shareScreen.style.background = '#FF9800';
+            
+            // Stop screen stream
+            if (hostVideo.srcObject) {
+                hostVideo.srcObject.getTracks().forEach(track => track.stop());
+                hostVideo.srcObject = null;
+            }
+        }
+
+        async function broadcastToViewers(stream) {
+            if (!currentLiveId) return;
+            
+            console.log('Setting up broadcast to viewers');
+            
+            // Listen for viewer requests
+            db.collection('lives').doc(currentLiveId).collection('signaling')
+                .onSnapshot(async (snapshot) => {
+                    snapshot.docChanges().forEach(async (change) => {
+                        if (change.type === 'added') {
+                            const data = change.doc.data();
+                            
+                            console.log('Host received signaling message:', data.type, 'from:', data.from);
+                            
+                            if (data.type === 'request-offer' && data.from !== currentUser.uid) {
+                                console.log('Creating offer for viewer:', data.from);
+                                await createOfferForViewer(data.from, stream);
+                            } else if (data.type === 'answer' && data.to === currentUser.uid) {
+                                console.log('Handling answer from viewer:', data.from);
+                                await handleAnswerFromViewer(data);
+                            } else if (data.type === 'candidate' && data.from !== currentUser.uid) {
+                                console.log('Handling ICE candidate from viewer:', data.from);
+                                await handleViewerIceCandidate(data);
+                            }
+                        }
+                    });
+                });
+        }
+
+        async function createOfferForViewer(viewerId, stream) {
+            try {
+                console.log('Creating peer connection for viewer:', viewerId);
+                const pc = new RTCPeerConnection(rtcConfiguration);
+                
+                // Add our stream to the connection
+                stream.getTracks().forEach(track => {
+                    console.log('Adding track to peer connection:', track.kind);
+                    pc.addTrack(track, stream);
+                });
+                
+                // Handle ICE candidates
+                pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        console.log('Sending ICE candidate to viewer:', viewerId);
+                        db.collection('lives').doc(currentLiveId).collection('signaling').add({
+                            type: 'candidate',
+                            candidate: event.candidate.toJSON(),
+                            from: currentUser.uid,
+                            to: viewerId,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                };
+                
+                // Monitor connection state
+                pc.onconnectionstatechange = () => {
+                    console.log(`Connection to viewer ${viewerId}:`, pc.connectionState);
+                };
+                
+                // Create and send offer
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                
+                console.log('Sending offer to viewer:', viewerId);
+                await db.collection('lives').doc(currentLiveId).collection('signaling').add({
+                    type: 'offer',
+                    offer: offer,
+                    from: currentUser.uid,
+                    to: viewerId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Store peer connection for this viewer
+                if (!window.viewerConnections) window.viewerConnections = {};
+                window.viewerConnections[viewerId] = pc;
+                
+            } catch (error) {
+                console.error('Error creating offer for viewer:', error);
+            }
+        }
+
+        async function handleAnswerFromViewer(data) {
+            try {
+                if (window.viewerConnections && window.viewerConnections[data.from]) {
+                    await window.viewerConnections[data.from].setRemoteDescription(new RTCSessionDescription(data.answer));
+                }
+            } catch (error) {
+                console.error('Error handling answer from viewer:', error);
+            }
+        }
+
+        async function handleViewerIceCandidate(data) {
+            try {
+                if (window.viewerConnections && window.viewerConnections[data.from]) {
+                    await window.viewerConnections[data.from].addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            } catch (error) {
+                console.error('Error handling ICE candidate from viewer:', error);
+            }
+        }
+
+        async function endLiveSession() {
+            if (!currentLiveId) return;
+
+            try {
+                // Update live session to not live
+                await db.collection('lives').doc(currentLiveId).update({
+                    isLive: false,
+                    endedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Stop media streams
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    mediaStream = null;
+                }
+
+                // Clean up listeners
+                if (currentLiveListener) {
+                    currentLiveListener();
+                    currentLiveListener = null;
+                }
+
+                // Reset state
+                currentLiveId = null;
+                isHost = false;
+
+                // Show dashboard
+                liveInterface.classList.remove('active');
+                dashboard.style.display = 'block';
+
+                console.log('Live session ended successfully');
+
+            } catch (error) {
+                console.error('Error ending live session:', error);
+                alert('Failed to end live session. Please try again.');
+            }
+        }
+
+        // Language toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const langButtons = document.querySelectorAll('.lang-btn');
+            
+            // Initialize language from localStorage or default to 'en'
+            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+            
+            langButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === savedLanguage);
+                
+                btn.addEventListener('click', function() {
+                    const lang = this.dataset.lang;
+                    localStorage.setItem('preferredLanguage', lang);
+                    langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+                });
+            });
+        });
+
+        // Add notification function
+        function showNotification(message, type = 'success') {
+            // Remove any existing notification
+            const existingNotification = document.querySelector('.notification-toast');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `notification-toast ${type}`;
+            notification.innerHTML = `
+                <i class="icon fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                <span class="message">${message}</span>
+                <button class="close">&times;</button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Show notification with animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Add close button functionality
+            const closeBtn = notification.querySelector('.close');
+            closeBtn.addEventListener('click', () => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            });
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 3000);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', async () => {
+            // Clear session storage to prevent automatic return to live page
+            sessionStorage.removeItem('redirectToLive');
+            sessionStorage.removeItem('isInLiveSession');
+            sessionStorage.removeItem('currentLiveId');
+            
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            if (livesListener) livesListener();
+            if (currentLiveListener) currentLiveListener();
+            if (viewersListener) viewersListener();
+            if (signalingListener) signalingListener();
+            
+            // Clean up viewer connection if leaving as viewer
+            if (currentViewingLiveId) {
+                try {
+                    const liveRef = db.collection('lives').doc(currentViewingLiveId);
+                    const liveDoc = await liveRef.get();
+                    
+                    if (liveDoc.exists) {
+                        const data = liveDoc.data();
+                        const updatedMembers = (data.members || []).filter(member => member.uid !== currentUser.uid);
+                        
+                        await liveRef.update({
+                            [`viewers.${currentUser.uid}`]: firebase.firestore.FieldValue.delete(),
+                            members: updatedMembers
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error cleaning up on page unload:', error);
+                }
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

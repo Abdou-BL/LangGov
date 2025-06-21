@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Team - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        .team-container {
+            max-width: 1200px;
+            margin: 60px auto 60px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .team-title {
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            margin-bottom: 40px;
+            padding: 0.5rem 2rem;
+            border: 3px solid var(--primary-green);
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #f2fbe1, #e1f8ba);
+            display: inline-block;
+            opacity: 0;
+            animation: slideInDown 0.8s ease-out forwards;
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .team-card {
+            background: var(--box-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: translateY(50px);
+            opacity: 0;
+            animation: slideUp 0.6s ease forwards;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .team-card:hover .card-image img {
+            transform: scale(1.1);
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(45,90,61,0.8), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .team-card:hover .card-overlay {
+            opacity: 1;
+        }
+
+        .card-content {
+            padding: 25px;
+            background: white;
+            position: relative;
+        }
+
+        .member-name {
+            font-size: 1.4rem;
+            color: var(--primary-green);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .member-role {
+            color: var(--text-medium);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .member-bio {
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light-green);
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--primary-green);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .skill-tag {
+            padding: 5px 15px;
+            background: var(--light-green);
+            color: var(--primary-green);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .skill-tag:hover {
+            background: var(--primary-green);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .team-card:nth-child(1) { animation-delay: 0.1s; }
+        .team-card:nth-child(2) { animation-delay: 0.3s; }
+        .team-card:nth-child(3) { animation-delay: 0.5s; }
+        .team-card:nth-child(4) { animation-delay: 0.7s; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li><a href="about.html" class="nav-link">About Us</a></li>
+                    <li><a href="people.html" class="nav-link">People</a></li>
+                    <li><a href="services.html" class="nav-link">Services</a></li>
+                    <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="team-container">
+            <h1 class="team-title">Meet Our Team</h1>
+            <div class="team-grid">
+                <!-- Team Member 1 -->
+                <div class="team-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" alt="John Smith">
+                        <div class="card-overlay"></div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="member-name">John Smith</h3>
+                        <div class="member-role">Lead Developer</div>
+                        <p class="member-bio">Full-stack developer with 10+ years of experience in web technologies and AI integration. Specialized in creating seamless user experiences.</p>
+                        <div class="skills">
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">Node.js</span>
+                            <span class="skill-tag">AI</span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="team-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" alt="Sarah Johnson">
+                        <div class="card-overlay"></div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="member-name">Sarah Johnson</h3>
+                        <div class="member-role">Language Expert</div>
+                        <p class="member-bio">Certified translator with expertise in French-English administrative translations. PhD in Linguistics and 8 years of experience.</p>
+                        <div class="skills">
+                            <span class="skill-tag">Translation</span>
+                            <span class="skill-tag">Linguistics</span>
+                            <span class="skill-tag">Documentation</span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link"><i class="fas fa-globe"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="team-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d" alt="Michael Chen">
+                        <div class="card-overlay"></div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="member-name">Michael Chen</h3>
+                        <div class="member-role">UI/UX Designer</div>
+                        <p class="member-bio">Creative designer focusing on user-centered design principles. Expert in creating intuitive and accessible interfaces.</p>
+                        <div class="skills">
+                            <span class="skill-tag">UI Design</span>
+                            <span class="skill-tag">UX Research</span>
+                            <span class="skill-tag">Figma</span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-dribbble"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-behance"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 4 -->
+                <div class="team-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e" alt="Emma Martinez">
+                        <div class="card-overlay"></div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="member-name">Emma Martinez</h3>
+                        <div class="member-role">Project Manager</div>
+                        <p class="member-bio">Experienced project manager specializing in language transition projects. Expert in agile methodologies and team coordination.</p>
+                        <div class="skills">
+                            <span class="skill-tag">Project Management</span>
+                            <span class="skill-tag">Agile</span>
+                            <span class="skill-tag">Leadership</span>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="contact.html" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

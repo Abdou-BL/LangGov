@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        .terms-content {
+            max-width: 800px;
+            margin: 40px auto 60px;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .terms-content h1 {
+            color: var(--primary-green);
+            margin-bottom: 30px;
+        }
+
+        .terms-content h2 {
+            color: var(--secondary-green);
+            margin: 25px 0 15px;
+        }
+
+        .terms-content p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .terms-content ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .terms-content li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="terms-content">
+            <h1>
+                <span class="english active">Terms of Service</span>
+                <span class="french">Conditions d'Utilisation</span>
+            </h1>
+            <p>
+                <span class="english active">Last updated: June 4, 2025</span>
+                <span class="french">Dernière mise à jour: 4 juin 2025</span>
+            </p>
+
+            <h2>
+                <span class="english active">1. Acceptance of Terms</span>
+                <span class="french">1. Acceptation des Conditions</span>
+            </h2>
+            <p>
+                <span class="english active">By accessing and using LangGov's services, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our services.</span>
+                <span class="french">En accédant et en utilisant les services de LangGov, vous acceptez d'être lié par ces Conditions d'Utilisation. Si vous n'êtes pas d'accord avec une partie de ces conditions, vous ne pouvez pas accéder à nos services.</span>
+            </p>
+
+            <h2>
+                <span class="english active">2. Description of Services</span>
+                <span class="french">2. Description des Services</span>
+            </h2>
+            <p>
+                <span class="english active">LangGov provides language transition services including:</span>
+                <span class="french">LangGov fournit des services de transition linguistique comprenant :</span>
+            </p>
+            <ul>
+                <li>
+                    <span class="english active">Administrative document translation</span>
+                    <span class="french">Traduction de documents administratifs</span>
+                </li>
+                <li>
+                    <span class="english active">Online English courses for officials</span>
+                    <span class="french">Cours d'anglais en ligne pour les fonctionnaires</span>
+                </li>
+                <li>
+                    <span class="english active">International correspondence support</span>
+                    <span class="french">Support de correspondance internationale</span>
+                </li>
+                <li>
+                    <span class="english active">Language transition consulting</span>
+                    <span class="french">Conseil en transition linguistique</span>
+                </li>
+                <li>
+                    <span class="english active">Access to terminology bank</span>
+                    <span class="french">Accès à la banque de terminologie</span>
+                </li>
+            </ul>
+
+            <h2>
+                <span class="english active">3. User Obligations</span>
+                <span class="french">3. Obligations des Utilisateurs</span>
+            </h2>
+            <p>
+                <span class="english active">Users of LangGov services agree to:</span>
+                <span class="french">Les utilisateurs des services LangGov s'engagent à :</span>
+            </p>
+            <ul>
+                <li>
+                    <span class="english active">Provide accurate and complete information</span>
+                    <span class="french">Fournir des informations exactes et complètes</span>
+                </li>
+                <li>
+                    <span class="english active">Maintain the confidentiality of their account</span>
+                    <span class="french">Maintenir la confidentialité de leur compte</span>
+                </li>
+                <li>
+                    <span class="english active">Use services in compliance with applicable laws</span>
+                    <span class="french">Utiliser les services conformément aux lois applicables</span>
+                </li>
+                <li>
+                    <span class="english active">Respect intellectual property rights</span>
+                    <span class="french">Respecter les droits de propriété intellectuelle</span>
+                </li>
+                <li>
+                    <span class="english active">Not misuse or attempt to manipulate our services</span>
+                    <span class="french">Ne pas abuser ou tenter de manipuler nos services</span>
+                </li>
+            </ul>
+
+            <h2>
+                <span class="english active">4. Service Delivery and Timeline</span>
+                <span class="french">4. Déploiement des Services et Durée</span>
+            </h2>
+            <p>
+                <span class="english active">We strive to deliver our services within agreed-upon timeframes. However, delivery times may vary based on complexity and volume of work. Specific delivery times will be communicated for each service request.</span>
+                <span class="french">Nous travaillons pour livrer nos services dans les délais convenus. Cependant, les délais de livraison peuvent varier en fonction de la complexité et du volume de travail. Les délais de livraison spécifiques seront communiqués pour chaque demande de service.</span>
+            </p>
+
+            <h2>
+                <span class="english active">5. Confidentiality</span>
+                <span class="french">5. Confidentialité</span>
+            </h2>
+            <p>
+                <span class="english active">We maintain strict confidentiality of all documents and information provided. Our staff and partners are bound by confidentiality agreements to protect your information.</span>
+                <span class="french">Nous maintenons une confidentialité stricte de tous les documents et informations fournies. Notre personnel et nos partenaires sont liés par des accords de confidentialité pour protéger vos informations.</span>
+            </p>
+
+            <h2>
+                <span class="english active">6. Payment Terms</span>
+                <span class="french">6. Conditions de Paiement</span>
+            </h2>
+            <p>
+                <span class="english active">Service fees are determined based on the scope of work. Payment terms and methods will be specified in service agreements. All fees are non-refundable unless otherwise stated.</span>
+                <span class="french">Les frais de service sont déterminés en fonction du volume de travail. Les termes de paiement et les méthodes de paiement seront spécifiés dans les accords de service. Tous les frais sont non remboursables à moins qu'ils ne soient spécifiquement mentionnés.</span>
+            </p>
+
+            <h2>
+                <span class="english active">7. Intellectual Property</span>
+                <span class="french">7. Propriété Intellectuelle</span>
+            </h2>
+            <p>
+                <span class="english active">All content and materials provided through our services remain the property of their respective owners. Users retain rights to their original documents.</span>
+                <span class="french">Tous les contenus et les matériels fournis par nos services restent la propriété de leurs propriétaires respectifs. Les utilisateurs conservent les droits sur leurs documents originaux.</span>
+            </p>
+
+            <h2>
+                <span class="english active">8. Limitation of Liability</span>
+                <span class="french">8. Limitation de la Responsabilité</span>
+            </h2>
+            <p>
+                <span class="english active">LangGov shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of our services.</span>
+                <span class="french">LangGov ne sera pas responsable de tout dommage indirect, incidentiel, spécial, conséquent ou puni résultant de votre utilisation de nos services.</span>
+            </p>
+
+            <h2>
+                <span class="english active">9. Modifications to Terms</span>
+                <span class="french">9. Modifications des Conditions</span>
+            </h2>
+            <p>
+                <span class="english active">We reserve the right to modify these terms at any time. Users will be notified of significant changes.</span>
+                <span class="french">Nous avons le droit de modifier ces conditions à tout moment. Les utilisateurs seront informés des changements significatifs.</span>
+            </p>
+
+            <h2>
+                <span class="english active">10. Contact Information</span>
+                <span class="french">10. Informations de Contact</span>
+            </h2>
+            <p>
+                <span class="english active">For questions about these Terms of Service, please contact us at legal@langgov.dz</span>
+                <span class="french">Pour poser des questions concernant ces Conditions d'Utilisation, veuillez nous contacter à legal@langgov.dz</span>
+            </p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Language toggle functionality for terms of service page
+        document.addEventListener('DOMContentLoaded', function() {
+            const langButtons = document.querySelectorAll('.lang-btn');
+            
+            // Initialize language from localStorage or default to 'en'
+            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+            
+            function setLanguage(lang) {
+                localStorage.setItem('preferredLanguage', lang);
+                langButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                });
+                updateLanguageDisplay(lang);
+            }
+            
+            function updateLanguageDisplay(lang) {
+                document.querySelectorAll('.english, .french').forEach(el => {
+                    el.classList.remove('active');
+                    if (lang === 'en' && el.classList.contains('english')) {
+                        el.classList.add('active');
+                    } else if (lang === 'fr' && el.classList.contains('french')) {
+                        el.classList.add('active');
+                    }
+                });
+            }
+            
+            // Set initial language
+            setLanguage(savedLanguage);
+            
+            // Language button click handlers
+            langButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const lang = this.dataset.lang;
+                    setLanguage(lang);
+                });
+            });
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Transition Consulting - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        .consulting-container {
+            max-width: 1200px;
+            margin: 20px auto 60px;  /* Changed from 120px to 20px top margin */
+            padding: 40px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-container {
+            margin-bottom: 50px;
+            padding: 30px;
+            border: 2px solid var(--primary-green);
+            border-radius: 15px;
+            background: linear-gradient(to right, #f2fbe1, #e1f8ba);
+        }
+
+        .section-title {
+            color: var(--primary-green);
+            font-size: 2rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .bilingual-label {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .audit-checklist {
+            display: grid;
+            gap: 15px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .yes-no-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .yes-no-btn {
+            padding: 8px 20px;
+            border: 2px solid var(--primary-green);
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .yes-no-btn.selected {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .action-btn {
+            display: block;
+            width: fit-content;
+            margin: 30px auto 0;
+            padding: 12px 30px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+        }
+
+        .roadmap-form {
+            display: grid;
+            gap: 20px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        .form-group {
+            display: grid;
+            gap: 10px;
+        }
+
+        .form-input {
+            padding: 10px;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .multi-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .select-option {
+            padding: 10px;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .select-option.selected {
+            border-color: var(--primary-green);
+            background: var(--light-green);
+        }
+
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .training-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .training-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+        }
+
+        .results-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .results-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-green);
+            width: 0;
+            transition: width 1s ease;
+        }
+
+        .roadmap-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .roadmap-icon {
+            font-size: 3rem;
+            color: var(--primary-green);
+            margin-bottom: 25px;
+        }
+
+        .roadmap-features {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .feature-item:hover {
+            transform: translateX(10px);
+            border-color: var(--primary-green);
+            background: var(--light-green);
+        }
+
+        .feature-item i:not(.fa-arrow-right, .fa-download, .fa-calendar-plus, .fa-cog) {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            width: 40px;
+            text-align: center;
+        }
+
+        .feature-text {
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .feature-btn {
+            padding: 8px;
+            width: 35px;
+            height: 35px;
+            background: var(--white);
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-btn:hover {
+            background: var(--primary-green);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .feature-btn i {
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .download-pdf-btn {
+            display: block;
+            width: fit-content;
+            margin: 20px auto 0;
+            padding: 12px 30px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .download-pdf-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+        }
+
+        .calendar-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .calendar-nav {
+            padding: 10px;
+            border: 2px solid var(--primary-green);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .current-month {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .book-btn {
+            display: block;
+            width: fit-content;
+            margin: 20px auto 0;
+            padding: 12px 30px;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .book-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+        }
+
+        .english, .french {
+            display: none;
+        }
+
+        .english.active, .french.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li class="services-nav">
+                        <a href="services.html" class="nav-link">Services</a>
+                        <div class="services-dropdown">
+                            <a href="document-translation.html" class="dropdown-item">
+                                <i class="fas fa-file-alt"></i>
+                                Document Translation
+                            </a>
+                            <a href="online-courses.html" class="dropdown-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                Online Courses
+                            </a>
+                            <a href="inter.html" class="dropdown-item">
+                                <i class="fas fa-globe"></i>
+                                International Correspondence
+                            </a>
+                            <a href="consult.html" class="dropdown-item">
+                                <i class="fas fa-comments"></i>
+                                Language Consulting
+                            </a>
+                            <a href="bank.html" class="dropdown-item">
+                                <i class="fas fa-book"></i>
+                                Terminology Bank
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="consulting-container">
+            <section class="section-container" id="audit">
+                <h2 class="section-title">
+                    <span class="english">Where does your institution stand today?</span>
+                    <span class="french">Où en est votre institution aujourd'hui ?</span>
+                </h2>
+                <div class="audit-checklist">
+                    <div class="checklist-item">
+                        <div class="bilingual-label">
+                            <span class="english">Does your institution have dedicated language training programs?</span>
+                            <span class="french">Votre institution dispose-t-elle de programmes de formation linguistique dédiés ?</span>
+                        </div>
+                        <div class="yes-no-buttons">
+                            <button class="yes-no-btn" data-value="yes">
+                                <span class="english">Yes</span>
+                                <span class="french">Oui</span>
+                            </button>
+                            <button class="yes-no-btn" data-value="no">
+                                <span class="english">No</span>
+                                <span class="french">Non</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="bilingual-label">
+                            <span class="english">Are your official documents available in both languages?</span>
+                            <span class="french">Vos documents officiels sont-ils disponibles dans les deux langues ?</span>
+                        </div>
+                        <div class="yes-no-buttons">
+                            <button class="yes-no-btn" data-value="yes">
+                                <span class="english">Yes</span>
+                                <span class="french">Oui</span>
+                            </button>
+                            <button class="yes-no-btn" data-value="no">
+                                <span class="english">No</span>
+                                <span class="french">Non</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="bilingual-label">
+                            <span class="english">Do you have bilingual staff in key positions?</span>
+                            <span class="french">Avez-vous du personnel bilingue aux postes clés ?</span>
+                        </div>
+                        <div class="yes-no-buttons">
+                            <button class="yes-no-btn" data-value="yes">
+                                <span class="english">Yes</span>
+                                <span class="french">Oui</span>
+                            </button>
+                            <button class="yes-no-btn" data-value="no">
+                                <span class="english">No</span>
+                                <span class="french">Non</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button class="action-btn" id="getAssessment">
+                    <span class="english">Get Your Assessment</span>
+                    <span class="french">Obtenir Votre Évaluation</span>
+                </button>
+                <div class="results-container" id="auditResults">
+                    <h3>
+                        <span class="english">Readiness Level</span>
+                        <span class="french">Niveau de Préparation</span>
+                    </h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p class="percentage">0%</p>
+                    
+                    <!-- Added feedback section -->
+                    <div class="feedback-section">
+                        <div class="strengths">
+                            <h4>
+                                <span class="english">Strengths</span>
+                                <span class="french">Points Forts</span>
+                            </h4>
+                            <ul class="feedback-list" id="strengthsList"></ul>
+                        </div>
+                        <div class="weaknesses">
+                            <h4>
+                                <span class="english">Areas for Improvement</span>
+                                <span class="french">Points à Améliorer</span>
+                            </h4>
+                            <ul class="feedback-list" id="weaknessesList"></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-container" id="roadmap">
+                <h2 class="section-title">
+                    <span class="english">Strategic Planning Tools</span>
+                    <span class="french">Outils de Planification Stratégique</span>
+                </h2>
+                <div class="roadmap-content">
+                    <div class="roadmap-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <ul class="roadmap-features">
+                        <li class="feature-item">
+                            <i class="fas fa-clipboard-list"></i>
+                            <div class="feature-text">
+                                <span class="english">Interactive Transition Assessment Questionnaire</span>
+                                <span class="french">Questionnaire Interactif d'Évaluation de Transition</span>
+                            </div>
+                            <button class="feature-btn" data-action="questionnaire">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-file-pdf"></i>
+                            <div class="feature-text">
+                                <span class="english">Strategic Templates & Guidelines (PDF)</span>
+                                <span class="french">Modèles et Directives Stratégiques (PDF)</span>
+                            </div>
+                            <button class="feature-btn" data-action="templates">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-calendar-check"></i>
+                            <div class="feature-text">
+                                <span class="english">Book a Strategy Consultation Session</span>
+                                <span class="french">Réserver une Session de Consultation Stratégique</span>
+                            </div>
+                            <button class="feature-btn" data-action="consultation">
+                                <i class="fas fa-calendar-plus"></i>
+                            </button>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-chart-line"></i>
+                            <div class="feature-text">
+                                <span class="english">Sample Transition Timeline Generator</span>
+                                <span class="french">Générateur d'Échéancier de Transition</span>
+                            </div>
+                            <button class="feature-btn" data-action="generate">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="section-container" id="training">
+                <h2 class="section-title">
+                    <span class="english">Training & Capacity Building</span>
+                    <span class="french">Formation et Renforcement des Capacités</span>
+                </h2>
+                <div class="training-grid">
+                    <div class="training-card">
+                        <i class="fas fa-graduation-cap card-icon"></i>
+                        <h3 class="bilingual-label">
+                            <span class="english">Micro-courses</span>
+                            <span class="french">Micro-cours</span>
+                        </h3>
+                        <button class="action-btn">
+                            <span class="english">Start</span>
+                            <span class="french">Commencer</span>
+                        </button>
+                    </div>
+                    <div class="training-card">
+                        <i class="fas fa-file-pdf card-icon"></i>
+                        <h3 class="bilingual-label">
+                            <span class="english">Toolkits</span>
+                            <span class="french">Boîtes à Outils</span>
+                        </h3>
+                        <button class="action-btn">
+                            <span class="english">Download</span>
+                            <span class="french">Télécharger</span>
+                        </button>
+                    </div>
+                    <div class="training-card">
+                        <i class="fas fa-video card-icon"></i>
+                        <h3 class="bilingual-label">
+                            <span class="english">Educational Videos</span>
+                            <span class="french">Vidéos Éducatives</span>
+                        </h3>
+                        <button class="action-btn">
+                            <span class="english">Watch</span>
+                            <span class="french">Regarder</span>
+                        </button>
+                    </div>
+                    <div class="training-card">
+                        <i class="fas fa-calendar-check card-icon"></i>
+                        <h3 class="bilingual-label">
+                            <span class="english">Live Workshops</span>
+                            <span class="french">Ateliers en Direct</span>
+                        </h3>
+                        <button class="action-btn">
+                            <span class="english">Book Now</span>
+                            <span class="french">Réserver</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div class="modal" id="planModal">
+        <button class="close-modal">&times;</button>
+        <h3>
+            <span class="english">Transition Plan</span>
+            <span class="french">Plan de Transition</span>
+        </h3>
+        <div class="plan-content"></div>
+        <button class="download-pdf-btn">
+            <span class="english">Download PDF</span>
+            <span class="french">Télécharger PDF</span>
+        </button>
+    </div>
+
+    <div class="modal" id="trainingModal">
+        <button class="close-modal">&times;</button>
+        <h3>
+            <span class="english">Training Resource</span>
+            <span class="french">Ressource de Formation</span>
+        </h3>
+        <div class="training-content"></div>
+    </div>
+
+    <div class="modal" id="workshopModal">
+        <button class="close-modal">&times;</button>
+        <h3>
+            <span class="english">Book Workshop</span>
+            <span class="french">Réserver un Atelier</span>
+        </h3>
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button class="calendar-nav prev">&lt;</button>
+                <h4 class="current-month">June 2025</h4>
+                <button class="calendar-nav next">&gt;</button>
+            </div>
+            <div class="calendar-grid"></div>
+        </div>
+        <button class="book-btn" disabled>
+            <span class="english">Book Selected Date</span>
+            <span class="french">Réserver la Date Sélectionnée</span>
+        </button>
+    </div>
+
+    <div class="overlay"></div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7A0JxXYHnzQ_LzDBB5SmXbKl-bCv2ZPI",
+            authDomain: "langgov-bf3b8.firebaseapp.com",
+            projectId: "langgov-bf3b8",
+            storageBucket: "langgov-bf3b8.firebasestorage.app",
+            messagingSenderId: "240928957703",
+            appId: "1:240928957703:web:b2e50595e71a2ec966d1a2"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Authentication state observer
+        auth.onAuthStateChanged((user) => {
+            const userIcon = document.querySelector('.fa-user').parentElement;
+            
+            if (user) {
+                // User is signed in
+                userIcon.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%;">`;
+            } else {
+                // User is signed out
+                userIcon.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        });
+
+        // User icon click handler
+        document.querySelector('.fa-user').parentElement.addEventListener('click', () => {
+            if (auth.currentUser) {
+                showProfileModal();
+            } else {
+                // Redirect to login or show login modal
+                window.location.href = 'main.html';
+            }
+        });
+
+        // Function to show profile modal
+        function showProfileModal() {
+            if (auth.currentUser) {
+                // Check both collections for the user's data
+                Promise.all([
+                    db.collection('admins').doc(auth.currentUser.uid).get(),
+                    db.collection('users').doc(auth.currentUser.uid).get()
+                ]).then(([adminDoc, userDoc]) => {
+                    const doc = adminDoc.exists ? adminDoc : userDoc;
+                    if (doc.exists) {
+                        const data = doc.data();
+                        
+                        // Create modal
+                        const modal = document.createElement('div');
+                        modal.className = 'modal';
+                        modal.style.display = 'block';
+                        modal.innerHTML = `
+                            <div class="modal-content">
+                                <button class="close-modal">&times;</button>
+                                <h2>User Profile</h2>
+                                <div class="profile-info">
+                                    <div class="user-avatar">
+                                        <img src="${auth.currentUser.photoURL}" alt="User avatar">
+                                    </div>
+                                    <div class="user-details">
+                                        <h3>${data.firstName} ${data.lastName}</h3>
+                                        <p><i class="fas fa-envelope"></i> ${auth.currentUser.email}</p>
+                                        <p><i class="fas fa-user-tag"></i> Account Type: ${data.accountType}</p>
+                                        <p><i class="fas fa-calendar-alt"></i> Date of Birth: ${data.dateOfBirth}</p>
+                                    </div>
+                                </div>
+                                <button id="signOut" class="action-btn">
+                                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                                </button>
+                            </div>
+                        `;
+                        
+                        document.body.appendChild(modal);
+                        
+                        // Add event listeners
+                        modal.querySelector('.close-modal').addEventListener('click', () => {
+                            modal.remove();
+                        });
+                        
+                        modal.querySelector('#signOut').addEventListener('click', () => {
+                            auth.signOut().then(() => {
+                                modal.remove();
+                            });
+                        });
+                        
+                        modal.addEventListener('click', (e) => {
+                            if (e.target === modal) {
+                                modal.remove();
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        // Language toggle functionality for consulting page
+        document.addEventListener('DOMContentLoaded', function() {
+            const langButtons = document.querySelectorAll('.lang-btn');
+            
+            // Initialize language from localStorage or default to 'en'
+            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+            
+            function setLanguage(lang) {
+                localStorage.setItem('preferredLanguage', lang);
+                langButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                });
+                updateLanguageDisplay(lang);
+            }
+            
+            function updateLanguageDisplay(lang) {
+                document.querySelectorAll('.english, .french').forEach(el => {
+                    el.classList.remove('active');
+                    if (lang === 'en' && el.classList.contains('english')) {
+                        el.classList.add('active');
+                    } else if (lang === 'fr' && el.classList.contains('french')) {
+                        el.classList.add('active');
+                    }
+                });
+            }
+            
+            // Set initial language
+            setLanguage(savedLanguage);
+            
+            // Language button click handlers
+            langButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const lang = this.dataset.lang;
+                    setLanguage(lang);
+                });
+            });
+
+            // Consulting page functionality
+            initializeConsultingPage();
+        });
+
+        // Consulting page initialization
+        function initializeConsultingPage() {
+            // Yes/No button functionality
+            document.querySelectorAll('.yes-no-buttons').forEach(group => {
+                const buttons = group.querySelectorAll('.yes-no-btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        buttons.forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                    });
+                });
+            });
+
+            // Assessment functionality
+            const getAssessmentBtn = document.getElementById('getAssessment');
+            if (getAssessmentBtn) {
+                getAssessmentBtn.addEventListener('click', () => {
+                    const results = document.getElementById('auditResults');
+                    results.classList.add('active');
+                    
+                    // Calculate progress based on selected answers
+                    const yesAnswers = document.querySelectorAll('.yes-no-btn.selected[data-value="yes"]').length;
+                    const totalQuestions = document.querySelectorAll('.checklist-item').length;
+                    const percentage = Math.round((yesAnswers / totalQuestions) * 100);
+                    
+                    // Update progress bar and percentage
+                    const progressFill = results.querySelector('.progress-fill');
+                    const percentageText = results.querySelector('.percentage');
+                    
+                    progressFill.style.width = '0%';
+                    setTimeout(() => {
+                        progressFill.style.width = `${percentage}%`;
+                        percentageText.textContent = `${percentage}%`;
+                    }, 100);
+
+                    // Save assessment results to Firebase
+                    const assessmentData = {
+                        score: percentage,
+                        answers: yesAnswers,
+                        totalQuestions: totalQuestions,
+                        assessmentDate: firebase.firestore.FieldValue.serverTimestamp(),
+                        userId: auth.currentUser ? auth.currentUser.uid : 'anonymous'
+                    };
+
+                    db.collection('assessments').add(assessmentData)
+                        .then(docRef => {
+                            console.log('Assessment saved with ID: ', docRef.id);
+                        })
+                        .catch(error => {
+                            console.error('Error saving assessment: ', error);
+                        });
+
+                    // Update feedback
+                    updateAssessmentFeedback(yesAnswers, totalQuestions);
+                });
+            }
+
+            // Language Audit Assessment feedback
+            const feedbackData = {
+                en: {
+                    strengths: [
+                        "Dedicated language training programs in place",
+                        "Bilingual documentation available",
+                        "Key positions staffed with bilingual personnel"
+                    ],
+                    weaknesses: [
+                        "No dedicated language training programs",
+                        "Documentation not available in both languages",
+                        "Lack of bilingual staff in key positions"
+                    ]
+                },
+                fr: {
+                    strengths: [
+                        "Programmes de formation linguistique dédiés en place",
+                        "Documentation bilingue disponible",
+                        "Postes clés occupés par du personnel bilingue"
+                    ],
+                    weaknesses: [
+                        "Pas de programmes de formation linguistique dédiés",
+                        "Documentation non disponible dans les deux langues",
+                        "Manque de personnel bilingue aux postes clés"
+                    ]
+                }
+            };
+
+            function updateAssessmentFeedback(yesAnswers, totalQuestions) {
+                const strengthsList = document.getElementById('strengthsList');
+                const weaknessesList = document.getElementById('weaknessesList');
+                const lang = localStorage.getItem('preferredLanguage') || 'en';
+                
+                if (strengthsList && weaknessesList) {
+                    strengthsList.innerHTML = '';
+                    weaknessesList.innerHTML = '';
+
+                    document.querySelectorAll('.checklist-item').forEach((item, index) => {
+                        const isYes = item.querySelector('.yes-no-btn.selected')?.dataset.value === 'yes';
+                        const li = document.createElement('li');
+                        li.textContent = isYes ? feedbackData[lang].strengths[index] : feedbackData[lang].weaknesses[index];
+                        if (isYes) {
+                            strengthsList.appendChild(li);
+                        } else {
+                            weaknessesList.appendChild(li);
+                        }
+                    });
+                }
+            }
+
+            // Multi-select functionality
+            document.querySelectorAll('.select-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    option.classList.toggle('selected');
+                });
+            });
+
+            // Roadmap Plan Generation
+            const roadmapForm = document.querySelector('.roadmap-form');
+            if (roadmapForm) {
+                roadmapForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    generateRoadmapPlan();
+                });
+            }
+
+            function generateRoadmapPlan() {
+                const planModal = document.getElementById('planModal');
+                const overlay = document.querySelector('.overlay');
+                const planContent = planModal.querySelector('.plan-content');
+                const lang = localStorage.getItem('preferredLanguage') || 'en';
+
+                const phases = {
+                    en: [
+                        {
+                            title: "Phase 1: Initial Assessment and Planning (1-2 months)",
+                            steps: [
+                                "Conduct detailed language proficiency assessment",
+                                "Identify priority departments and documents",
+                                "Develop timeline and resource allocation plan"
+                            ]
+                        },
+                        {
+                            title: "Phase 2: Infrastructure Setup (2-3 months)",
+                            steps: [
+                                "Establish language training programs",
+                                "Set up translation workflows",
+                                "Create bilingual templates and guidelines"
+                            ]
+                        },
+                        {
+                            title: "Phase 3: Implementation (3-6 months)",
+                            steps: [
+                                "Begin staff training programs",
+                                "Start document translation process",
+                                "Implement bilingual communication protocols"
+                            ]
+                        },
+                        {
+                            title: "Phase 4: Monitoring and Optimization",
+                            steps: [
+                                "Track progress and completion rates",
+                                "Gather feedback and adjust processes",
+                                "Evaluate and celebrate successes"
+                            ]
+                        }
+                    ],
+                    fr: [
+                        {
+                            title: "Phase 1: Évaluation Initiale et Planification (1-2 mois)",
+                            steps: [
+                                "Effectuer une évaluation détaillée des compétences linguistiques",
+                                "Identifier les départements et documents prioritaires",
+                                "Développer un calendrier et un plan d'allocation des ressources"
+                            ]
+                        },
+                        {
+                            title: "Phase 2: Mise en Place de l'Infrastructure (2-3 mois)",
+                            steps: [
+                                "Établir des programmes de formation linguistique",
+                                "Mettre en place des flux de traduction",
+                                "Créer des modèles et directives bilingues"
+                            ]
+                        },
+                        {
+                            title: "Phase 3: Mise en Œuvre (3-6 mois)",
+                            steps: [
+                                "Commencer les programmes de formation du personnel",
+                                "Démarrer le processus de traduction des documents",
+                                "Mettre en œuvre des protocoles de communication bilingue"
+                            ]
+                        },
+                        {
+                            title: "Phase 4: Suivi et Optimisation",
+                            steps: [
+                                "Suivre les progrès et les taux d'achèvement",
+                                "Recueillir des retours et ajuster les processus",
+                                "Évaluer et célébrer les succès"
+                            ]
+                        }
+                    ]
+                };
+
+                planContent.innerHTML = phases[lang].map(phase => `
+                    <div class="plan-phase">
+                        <h4>${phase.title}</h4>
+                        <ul>
+                            ${phase.steps.map(step => `<li>${step}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+
+                planModal.classList.add('active');
+                overlay.classList.add('active');
+            }
+
+            // Training Cards Interaction
+            document.querySelectorAll('.training-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('action-btn')) return;
+
+                    const trainingType = this.querySelector('.bilingual-label').textContent;
+                    const modal = document.getElementById('trainingModal');
+                    const content = modal.querySelector('.training-content');
+                    const overlay = document.querySelector('.overlay');
+
+                    if (trainingType.includes('Workshop') || trainingType.includes('Atelier')) {
+                        const workshopModal = document.getElementById('workshopModal');
+                        workshopModal.classList.add('active');
+                        overlay.classList.add('active');
+                        initializeCalendar();
+                    } else {
+                        content.innerHTML = `<p>Content for ${trainingType} will be available soon.</p>`;
+                        modal.classList.add('active');
+                        overlay.classList.add('active');
+                    }
+                });
+            });
+
+            // Calendar Functionality
+            function initializeCalendar() {
+                const calendar = document.querySelector('.calendar-grid');
+                const currentMonthDisplay = document.querySelector('.current-month');
+                const today = new Date();
+                let currentMonth = today.getMonth();
+                let currentYear = today.getFullYear();
+
+                function renderCalendar() {
+                    const firstDay = new Date(currentYear, currentMonth, 1);
+                    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                      'July', 'August', 'September', 'October', 'November', 'December'];
+
+                    currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                    calendar.innerHTML = '';
+
+                    // Add day headers
+                    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                        const dayHeader = document.createElement('div');
+                        dayHeader.classList.add('calendar-day-header');
+                        dayHeader.textContent = day;
+                        calendar.appendChild(dayHeader);
+                    });
+
+                    // Add empty cells for days before first of month
+                    for (let i = 0; i < firstDay.getDay(); i++) {
+                        calendar.appendChild(document.createElement('div'));
+                    }
+
+                    // Add days
+                    for (let day = 1; day <= lastDay.getDate(); day++) {
+                        const dayCell = document.createElement('div');
+                        dayCell.classList.add('calendar-day');
+                        dayCell.textContent = day;
+
+                        const date = new Date(currentYear, currentMonth, day);
+                        if (date < today) {
+                            dayCell.classList.add('disabled');
+                        } else {
+                            dayCell.addEventListener('click', function() {
+                                document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
+                                this.classList.add('selected');
+                                const bookBtn = document.querySelector('.book-btn');
+                                if (bookBtn) bookBtn.disabled = false;
+                            });
+                        }
+
+                        calendar.appendChild(dayCell);
+                    }
+                }
+
+                const prevBtn = document.querySelector('.prev');
+                const nextBtn = document.querySelector('.next');
+
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', () => {
+                        if (currentMonth > today.getMonth() || currentYear > today.getFullYear()) {
+                            currentMonth--;
+                            if (currentMonth < 0) {
+                                currentMonth = 11;
+                                currentYear--;
+                            }
+                            renderCalendar();
+                        }
+                    });
+                }
+
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', () => {
+                        currentMonth++;
+                        if (currentMonth > 11) {
+                            currentMonth = 0;
+                            currentYear++;
+                        }
+                        renderCalendar();
+                    });
+                }
+
+                renderCalendar();
+            }
+
+            // Close modals
+            document.querySelectorAll('.close-modal, .overlay').forEach(element => {
+                element.addEventListener('click', () => {
+                    document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+                    const overlay = document.querySelector('.overlay');
+                    if (overlay) overlay.classList.remove('active');
+                });
+            });
+
+            // Download PDF button
+            const downloadPdfBtn = document.querySelector('.download-pdf-btn');
+            if (downloadPdfBtn) {
+                downloadPdfBtn.addEventListener('click', () => {
+                    alert('PDF download simulation: Your transition plan is being downloaded.');
+                });
+            }
+
+            // Book workshop button
+            const bookBtn = document.querySelector('.book-btn');
+            if (bookBtn) {
+                bookBtn.addEventListener('click', function() {
+                    const selectedDate = document.querySelector('.calendar-day.selected');
+                    if (selectedDate) {
+                        alert(`Workshop booking simulation: Your workshop has been booked for ${selectedDate.textContent} ${document.querySelector('.current-month').textContent}`);
+                        const workshopModal = document.getElementById('workshopModal');
+                        const overlay = document.querySelector('.overlay');
+                        if (workshopModal) workshopModal.classList.remove('active');
+                        if (overlay) overlay.classList.remove('active');
+                    }
+                });
+            }
+
+            // Feature buttons functionality
+            document.querySelectorAll('.feature-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    const modal = document.getElementById('planModal');
+                    const content = modal.querySelector('.plan-content');
+                    const overlay = document.querySelector('.overlay');
+                    const lang = localStorage.getItem('preferredLanguage') || 'en';
+
+                    switch(action) {
+                        case 'questionnaire':
+                            content.innerHTML = `
+                                <h4>${lang === 'en' ? 'Transition Assessment Questionnaire' : 'Questionnaire d\'Évaluation de Transition'}</h4>
+                                <p>${lang === 'en' ? 'The interactive questionnaire will be available soon.' : 'Le questionnaire interactif sera bientôt disponible.'}</p>
+                            `;
+                            break;
+                        case 'templates':
+                            // Simulate PDF download
+                            alert(lang === 'en' ? 'Downloading templates...' : 'Téléchargement des modèles...');
+                            return;
+                        case 'consultation':
+                            content.innerHTML = `
+                                <div class="calendar-container">
+                                    <div class="calendar-header">
+                                        <button class="calendar-nav prev">&lt;</button>
+                                        <h4 class="current-month">June 2025</h4>
+                                        <button class="calendar-nav next">&gt;</button>
+                                    </div>
+                                    <div class="calendar-grid"></div>
+                                </div>
+                                <button class="book-btn" disabled>
+                                    ${lang === 'en' ? 'Book Consultation' : 'Réserver la Consultation'}
+                                </button>
+                            `;
+                            initializeCalendar();
+                            break;
+                        case 'generate':
+                            content.innerHTML = `
+                                <h4>${lang === 'en' ? 'Timeline Generator' : 'Générateur d\'Échéancier'}</h4>
+                                <p>${lang === 'en' ? 'Sample timeline will be generated here.' : 'L\'échéancier exemple sera généré ici.'}</p>
+                            `;
+                            break;
+                    }
+
+                    modal.classList.add('active');
+                    overlay.classList.add('active');
+                });
+            });
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

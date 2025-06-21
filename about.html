@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .about-logo {
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+            animation-delay: 0.5s; /* Logo appears first */
+        }
+
+        .animated-title {
+            perspective: 500px;
+            line-height: 1.2;
+            margin-bottom: 30px !important;
+        }
+
+        .animated-title .word {
+            display: block;
+            animation: show 0.01s forwards, pop-word 1.5s forwards;
+            animation-timing-function: cubic-bezier(0.14, 1.23, 0.33, 1.16);
+            opacity: 0;
+            transform: rotateX(120deg);
+            transform-origin: 50% 100%;
+        }
+
+        /* Add delay to title animations to start after logo */
+        .animated-title .word:nth-of-type(1) {
+            animation-delay: 1.5s; /* First title appears after logo */
+        }
+
+        .animated-title .word:nth-of-type(2) {
+            padding: 0;
+            animation-delay: 3s; /* Second title appears last */
+            font-size: 2rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li><a href="about.html" class="nav-link">About Us</a></li>
+                    <li><a href="people.html" class="nav-link">People</a></li>
+                    <li><a href="services.html" class="nav-link">Services</a></li>
+                    <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="about" id="about">
+            <div class="container">
+                <div class="about-content">
+                    <div class="about-column">
+                        <div style="text-align: center;">
+                            <img src="Logo.png" alt="LangGov Logo" class="about-logo">
+                            <h1 style="font-size: 2.5rem; color: var(--primary-green); margin: 20px 0;" class="animated-title">
+                                <span class="word" id="aboutWhatIsLangGov">What is LangGov?</span>
+                                <span class="word about-title" id="aboutTitle">A Linguistic platform for Transitioning from French to English in Algerian administration</span>
+                            </h1>
+                        </div>
+                        
+                        <!-- Introduction Box -->
+                        <div class="about-box" style="background-color: var(--box-color); display: flex; align-items: center; gap: 30px; padding: 25px; margin-bottom: 30px; border-radius: 12px;">
+                            <p class="about-text" id="aboutIntro" style="color: white; flex: 1; font-size: 1.1rem; line-height: 1.8;">
+                                Algerian administrations are called upon to undergo a linguistic transition from French to English.
+                                This change, key to modernization, is slowed down by a lack of tools, training, and support.
+                            </p>
+                            <img src="algeria_english_training.png" alt="Language Training" style="width: 500px; height: 300px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                        </div>
+
+                        <!-- Mission Box -->
+                        <div class="about-box" style="background-color: var(--box-color); display: flex; align-items: center; gap: 30px; padding: 25px; margin-bottom: 30px; border-radius: 12px;">
+                            <video style="width: 500px; height: 300px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" autoplay loop muted>
+                                <source src="Mission.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div style="flex: 1;">
+                                <h3 id="aboutMissionTitle" style="color: white; font-size: 1.4rem; margin-bottom: 15px;">Mission:</h3>
+                                <p id="aboutMissionText" style="color: white; font-size: 1.2rem; line-height: 1.8;font-weight: 500;">Our goal is to provide a comprehensive platform along with tailored training programs, adapted to the specific needs of each public institution regardless of its size or function to ensure an effective, sustainable, and well-structured transition to English.</p>
+                            </div>
+                        </div>
+
+                        <!-- Vision Box -->
+                        <div class="about-box" style="background-color: var(--box-color); display: flex; align-items: center; gap: 30px; padding: 25px; margin-bottom: 30px; border-radius: 12px;">
+                            <div style="flex: 1;">
+                                <h3 id="aboutVisionTitle" style="color: white; font-size: 1.4rem; margin-bottom: 15px;">Vision:</h3>
+                                <p id="aboutVisionText" style="color: white; font-size: 1.2rem; line-height: 1.8;font-weight: 500;">Make LangGov a key player to Support the modernization of Algerian administration through a smooth shift to English, promoting an open and globally connected administrative culture</p>
+                            </div>
+                            <video style="width: 500px; height: 300px; object-fit: cover; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" autoplay loop muted>
+                                <source src="vision.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="contact.html" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

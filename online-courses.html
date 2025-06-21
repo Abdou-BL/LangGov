@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online English Courses - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        .courses-container {
+            max-width: 1200px;
+            margin: 40px auto 60px;  /* Changed from 80px to 40px top margin */
+            padding: 40px;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .courses-title {
+            text-align: center;
+            color: var(--primary-green);
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+        }
+
+        .courses-subtitle {
+            text-align: center;
+            color: var(--text-medium);
+            font-size: 1.2rem;
+            margin-bottom: 60px;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .course-column {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(to right, #f2fbe1, #e1f8ba);
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 600px;
+        }
+
+        .course-column:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .column-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+
+        .column-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .column-title {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .course-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .course-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .course-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .box-title {
+            color: var(--primary-green);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .box-image {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+
+        .course-column:nth-child(2) .box-image {
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .courses-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .course-column {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li class="services-nav">
+                        <a href="services.html" class="nav-link">Services</a>
+                        <div class="services-dropdown">
+                            <a href="document-translation.html" class="dropdown-item">
+                                <i class="fas fa-file-alt"></i>
+                                Document Translation
+                            </a>
+                            <a href="online-courses.html" class="dropdown-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                Online Courses
+                            </a>
+                            <a href="inter.html" class="dropdown-item">
+                                <i class="fas fa-globe"></i>
+                                International Correspondence
+                            </a>
+                            <a href="consult.html" class="dropdown-item">
+                                <i class="fas fa-comments"></i>
+                                Language Consulting
+                            </a>
+                            <a href="bank.html" class="dropdown-item">
+                                <i class="fas fa-book"></i>
+                                Terminology Bank
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+                <div class="header-icons">
+                    <button class="icon-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="icon-btn" title="Profile">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="courses-container">
+            <h1 class="courses-title">Online English Courses for Officials</h1>
+            <h2 class="courses-subtitle">Interactive Language Training for Public Officials</h2>
+            
+            <div class="courses-grid">
+                <div class="course-column">
+                    <div class="column-icon">
+                        <img src="Course_Categories-removebg-preview.png" alt="Course Categories Icon">
+                    </div>
+                    <h3 class="column-title">Course Categories</h3>
+                    <div class="course-boxes">
+                        <div class="course-box">
+                            <h4 class="box-title" data-title-key="beginners" style="color: black; font-weight: bold;">Beginners</h4>
+                            <img src="education_icon1 (1).png" alt="Beginners" class="box-image">
+                        </div>
+                        <div class="course-box">
+                            <h4 class="box-title" data-title-key="intermediate" style="color: black; font-weight: bold;">Intermediate</h4>
+                            <img src="education_icon2 (1).png" alt="Intermediate" class="box-image">
+                        </div>
+                        <div class="course-box">
+                            <h4 class="box-title" data-title-key="legalAdmin" style="color: black; font-weight: bold;">Legal/Administrative English</h4>
+                            <img src="education_icon3 (1).png" alt="Legal/Administrative" class="box-image">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="course-column">
+                    <div class="column-icon">
+                        <img src="Flexible_Schedule-removebg-preview.png" alt="Flexible Schedule Icon" class="column-icon-img" style="width: 100px; height: 100px;">
+                    </div>
+                    <h3 class="column-title">Flexible Schedule</h3>
+                    <div class="course-boxes">
+                        <div class="course-box" onclick="window.location.href='live.html'" style="cursor: pointer;">
+                            <h4 class="box-title" data-title-key="liveOnline" style="color: black; font-weight: bold;">Live Online</h4>
+                            <img src="Live_online.jpg" alt="Live Online" class="box-image">
+                        </div>
+                        <div class="course-box">
+                            <h4 class="box-title" data-title-key="recordedLessons" style="color: black; font-weight: bold;">Recorded Lessons</h4>
+                            <img src="record.png" alt="Record Lessons" class="box-image">
+                        </div>
+                    </div>
+                    <p class="column-description" style="margin-top: auto; padding-top: 40px; color: var(--text-medium); font-weight: bold;">Attend Live Online Sessions or access Recorded Lessons 24/7</p>
+                </div>
+                
+                <div class="course-column">
+                    <div class="column-icon">
+                        <img src="Track_and_Certify-removebg-preview.png" alt="Track and Certify Icon">
+                    </div>
+                    <h3 class="column-title">Track and Certify</h3>
+                    <div class="course-boxes">
+                        <div class="course-box">
+                            <h4 class="box-title" data-title-key="progress" style="color: black; font-weight: bold;">Your Progress</h4>
+                            <img src="your progress.png" alt="Your Progress" class="box-image">
+                        </div>
+                        <div class="course-box">
+                            <h4 class="box-title" data-title-key="certificate" style="color: black; font-weight: bold;">Certificate</h4>
+                            <img src="certificate.png" alt="Certificate" class="box-image">
+                        </div>
+                    </div>
+                    <p class="column-description" style="margin-top: auto; padding-top: 40px; color: var(--text-medium); font-weight: bold;">Monitor your progress and download your certificate upon completion</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

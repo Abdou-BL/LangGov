@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>International Correspondence - LangGov</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        .correspondence-container {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 40px;
+            background: linear-gradient(145deg, var(--light-beige) 0%, var(--beige) 100%);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(45, 90, 61, 0.15);
+            border: 2px solid var(--primary-green);
+            /* Add subtle pattern overlay */
+            background-image: 
+                linear-gradient(145deg, rgba(255,255,255,0.95), rgba(232,245,232,0.95)),
+                repeating-linear-gradient(45deg, 
+                    rgba(45, 90, 61, 0.05) 0px,
+                    rgba(45, 90, 61, 0.05) 1px,
+                    transparent 1px,
+                    transparent 10px
+                );
+        }
+
+        .page-title {
+            text-align: center;
+            color: var(--text-dark);
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            position: relative;
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border: 3px solid var(--primary-green);
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #f2fbe1, #e1f8ba);
+            margin-bottom: 10px;
+            width: 100%;
+            font-weight: 800;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            margin-bottom: 60px;
+            position: relative;
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border: 3px solid var(--primary-green);
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #f2fbe1, #e1f8ba);
+            width: 100%;
+            font-weight: 700;
+        }
+
+        .letter-type {
+            margin-bottom: 30px;
+        }
+
+        .type-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .type-option {
+            padding: 15px;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            background-color: white;
+            font-weight: 600;
+        }
+
+        .type-option:hover, .type-option.selected {
+            border: 3px solid var(--primary-green);
+            background: linear-gradient(to bottom, #f2fbe1, #e1f8ba);
+            transform: translateY(-2px);
+        }
+
+        .editor-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .editor-container, .ai-output {
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            padding: 20px;
+            background-color: white;
+            min-height: 300px; /* Changed from height to min-height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            flex: 1;
+            padding: 15px;
+            border: none;
+            resize: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            background: transparent;
+            outline: none;
+            min-height: 250px; /* Added minimum height */
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .suggestions-btn {
+            background: var(--white);
+            color: var(--primary-green);
+            border: 2px solid var(--primary-green);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 90%;
+            width: 400px;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-green);
+        }
+
+        .bilingual-label {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 800;
+            text-decoration: underline;
+            color: var(--primary-green);
+        }
+
+        .arabic {
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+
+        /* Add styles for the AI output content */
+        .ai-placeholder {
+            flex: 1;
+            line-height: 1.6;
+            min-height: 250px; /* Match editor textarea */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="main.html">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="main.html" class="nav-link">Home</a></li>
+                    <li class="services-nav">
+                        <a href="services.html" class="nav-link">Services</a>
+                        <div class="services-dropdown">
+                            <a href="document-translation.html" class="dropdown-item">
+                                <i class="fas fa-file-alt"></i>
+                                Document Translation
+                            </a>
+                            <a href="online-courses.html" class="dropdown-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                Online Courses
+                            </a>
+                            <a href="inter.html" class="dropdown-item">
+                                <i class="fas fa-globe"></i>
+                                International Correspondence
+                            </a>
+                            <a href="consult.html" class="dropdown-item">
+                                <i class="fas fa-comments"></i>
+                                Language Consulting
+                            </a>
+                            <a href="bank.html" class="dropdown-item">
+                                <i class="fas fa-book"></i>
+                                Terminology Bank
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="header-controls">
+                <div class="language-toggle">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="fr">FR</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="correspondence-container">
+            <h1 class="page-title">International Correspondence Support</h1>
+            <h2 class="page-subtitle">Draft and Review International Administrative Letters</h2>
+
+            <div class="letter-type">
+                <div class="bilingual-label">
+                    <span class="english">Letter Type / </span>
+                    <span class="french">Type de Lettre</span>
+                </div>
+                <div class="type-options">
+                    <div class="type-option" data-type="request">
+                        <div class="english">Request</div>
+                        <div class="french">Demande</div>
+                    </div>
+                    <div class="type-option" data-type="invitation">
+                        <div class="english">Invitation</div>
+                        <div class="french">Invitation</div>
+                    </div>
+                    <div class="type-option" data-type="complaint">
+                        <div class="english">Complaint</div>
+                        <div class="french">Réclamation</div>
+                    </div>
+                    <div class="type-option" data-type="response">
+                        <div class="english">Response</div>
+                        <div class="french">Réponse</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-section">
+                <div class="editor-container">
+                    <div class="bilingual-label">
+                        <span>Rédigez Votre Lettre</span>
+                    </div>
+                    <textarea class="editor-textarea" placeholder="Écrivez votre brouillon ici"></textarea>
+                </div>
+                <div class="ai-output">
+                    <div class="bilingual-label">
+                        <span>🧠 AI-Generated English Version</span>
+                    </div>
+                    <div class="ai-placeholder">
+                        This is where your polished English version will be generated.
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="action-btn suggestions-btn" style="min-width: 200px;">
+                    <span>Suggestions</span>
+                </button>
+                <button class="action-btn download-btn" style="min-width: 200px;">
+                    <span class="english">Send</span>
+                    <span class="french">Envoyer</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal">
+        <button class="close-modal">&times;</button>
+        <h3>
+            <span class="english">Feature Under Development</span> /
+            <span class="french">Fonctionnalité en Développement</span>
+        </h3>
+        <p>
+            <span class="english">Integration with AI and email will be added soon.</span> /
+            <span class="french">L'intégration avec l'IA et l'email sera bientôt ajoutée.</span>
+        </p>
+    </div>
+    <div class="overlay"></div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="Logo.png" alt="LangGov Logo" class="logo-img">
+                </div>
+                <div class="footer-links">
+                    <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LangGov. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="inter.js"></script>
+</body>
+</html>
