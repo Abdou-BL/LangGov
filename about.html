@@ -102,6 +102,8 @@
                             <img src="Logo.png" alt="LangGov Logo" class="about-logo">
                             <h1 style="font-size: 2.5rem; color: var(--primary-green); margin: 20px 0;" class="animated-title">
                                 <span class="word" id="aboutWhatIsLangGov">What is LangGov?</span>
+                            </h1>
+                            <h1 style="font-size: 2.5rem; color: var(--primary-green); margin: 20px 0;" class="animated-title">
                                 <span class="word about-title" id="aboutTitle">A Linguistic platform for Transitioning from French to English in Algerian administration</span>
                             </h1>
                         </div>
@@ -162,69 +164,6 @@
         </div>
     </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Language translations
-            const translations = {
-                en: {
-                    whatIsLangGov: "What is LangGov?",
-                    platformTitle: "A Linguistic platform for Transitioning from French to English in Algerian administration",
-                    introText: "Algerian administrations are called upon to undergo a linguistic transition from French to English. This change, key to modernization, is slowed down by a lack of tools, training, and support.",
-                    missionTitle: "Mission:",
-                    missionText: "Our goal is to provide a comprehensive platform along with tailored training programs, adapted to the specific needs of each public institution regardless of its size or function to ensure an effective, sustainable, and well-structured transition to English.",
-                    visionTitle: "Vision:",
-                    visionText: "Make LangGov a key player to Support the modernization of Algerian administration through a smooth shift to English, promoting an open and globally connected administrative culture"
-                },
-                fr: {
-                    whatIsLangGov: "Qu'est-ce que LangGov ?",
-                    platformTitle: "Une plateforme linguistique pour la transition du français vers l'anglais dans l'administration algérienne",
-                    introText: "Les administrations algériennes sont appelées à opérer une transition linguistique du français vers l'anglais. Ce changement, clé de la modernisation, est freiné par un manque d'outils, de formation et d'accompagnement.",
-                    missionTitle: "Mission :",
-                    missionText: "Notre objectif est de fournir une plateforme complète ainsi que des programmes de formation sur mesure, adaptés aux besoins spécifiques de chaque institution publique, quelle que soit sa taille ou sa fonction, afin d'assurer une transition efficace, durable et bien structurée vers l'anglais.",
-                    visionTitle: "Vision :",
-                    visionText: "Faire de LangGov un acteur clé pour soutenir la modernisation de l'administration algérienne à travers un passage en douceur à l'anglais, favorisant une culture administrative ouverte et connectée au monde."
-                }
-            };
-
-            // Language toggle functionality 
-            const langButtons = document.querySelectorAll('.lang-btn');
-            
-            function setLanguage(lang) {
-                // Update language buttons
-                langButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.lang === lang);
-                });
-
-                // Update all text content
-                document.getElementById('aboutWhatIsLangGov').textContent = translations[lang].whatIsLangGov;
-                document.getElementById('aboutTitle').textContent = translations[lang].platformTitle;
-                document.getElementById('aboutIntro').textContent = translations[lang].introText;
-                document.getElementById('aboutMissionTitle').textContent = translations[lang].missionTitle;
-                document.getElementById('aboutMissionText').textContent = translations[lang].missionText;
-                document.getElementById('aboutVisionTitle').textContent = translations[lang].visionTitle;
-                document.getElementById('aboutVisionText').textContent = translations[lang].visionText;
-                
-                // Store the language preference
-                localStorage.setItem('preferredLanguage', lang);
-            }
-
-            // Initialize with saved language or default to 'en'
-            const savedLanguage = localStorage.getItem('preferredLanguage') || 'en';
-            setLanguage(savedLanguage);
-
-            // Add click handlers to language buttons
-            langButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const lang = this.dataset.lang;
-                    setLanguage(lang);
-                });
-            });
-
-            // Ensure translations are applied on page load
-            window.addEventListener('load', () => {
-                setLanguage(savedLanguage);
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
