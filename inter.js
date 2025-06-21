@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
             suggestions: "Suggestions",
             download: "Send",  // Changed from "Download or Send" to "Send"
             modalTitle: "Feature Under Development",
-            modalContent: "Integration with AI and email will be added soon."
+            modalContent: "Integration with AI and email will be added soon.",
+            printConfirm: "Go to print?"
         },
         fr: {
             menu: {
@@ -46,7 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
             suggestions: "Suggestions", 
             download: "Envoyer",  // Changed from "Télécharger ou Envoyer" to "Envoyer"
             modalTitle: "Fonctionnalité en Développement",
-            modalContent: "L'intégration avec l'IA et l'email sera bientôt ajoutée."
+            modalContent: "L'intégration avec l'IA et l'email sera bientôt ajoutée.",
+            printConfirm: "Aller à l'impression ?"
         }
     };
 
@@ -178,6 +180,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (modalContent) {
             modalContent.innerHTML = `<span>${translations[lang].modalContent}</span>`;
         }
+
+        // Update print confirmation modal title
+        const printConfirmModalTitle = document.querySelector('.print-confirm-modal .modal-title-confirm');
+        if (printConfirmModalTitle) {
+            printConfirmModalTitle.textContent = translations[lang].printConfirm;
+        }
     }
 
     // Letter type selection
@@ -263,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Introduction:\nCher/Chère Responsable de [Département],\nJe vous écris pour déposer une plainte formelle concernant...\n\nCorps:\nLes détails de ma plainte sont...\n\nConclusion:\nJ'attends une résolution rapide de ce problème.\n\nCordialement,\n[Votre Nom]",
                 
                 "Introduction:\nCher/Chère [Titre],\nJe dois porter à votre attention un problème persistant...\n\nCorps:\nCette situation a eu un impact négatif sur...\n\nConclusion:\nJe compte sur vous pour traiter cette question rapidement.\n\nSincèrement,\n[Votre Nom]"
-            ]
+            ],
         },
         response: {
             en: [
@@ -338,13 +346,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to translate French text to English using Gemini AI
     async function translateToEnglish(frenchText) {
-        const aiOutput = document.querySelector('.ai-output .ai-placeholder');
-        if (!aiOutput) {
-            console.error('AI output element not found');
+        const aiPlaceholder = document.querySelector('.ai-placeholder');
+        const translatedTextEditor = document.getElementById('translatedTextEditor');
+        const translatedTextDiv = document.getElementById('translatedText');
+
+        if (!aiPlaceholder || !translatedTextEditor || !translatedTextDiv) {
+            console.error('Required elements not found');
             return;
         }
 
-        aiOutput.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Traduction en cours...</div>';
+        aiPlaceholder.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Traduction en cours...</div>';
+        aiPlaceholder.style.display = 'block';
+        translatedTextEditor.style.display = 'none';
 
         try {
             const selectedType = document.querySelector('.type-option.selected');
@@ -352,16 +365,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const prompt = `You are a professional translator specializing in formal administrative correspondence. 
 
-Please translate the following French ${letterType} letter into professional English, maintaining the formal tone and structure appropriate for international administrative correspondence:
+Please translate the following French ${letterType} letter into professional English. Return only the translated text, preserving line breaks.
 
-${frenchText}
-
-Please ensure the translation:
-- Maintains professional and formal language
-- Preserves the original structure and formatting
-- Uses appropriate English administrative terminology
-- Keeps the same level of politeness and formality as the French original`;
-
+${frenchText}`;
             // Updated API URL for the newer version
             const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -423,7 +429,10 @@ Please ensure the translation:
                 const translatedText = data.candidates[0].content.parts[0].text;
                 console.log('Translation successful:', translatedText.substring(0, 100) + '...');
                 
-                aiOutput.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;">${translatedText}</div>`;
+                // Show editor with translated text
+                aiPlaceholder.style.display = 'none';
+                translatedTextDiv.innerHTML = translatedText.replace(/\n/g, '<br>'); // Convert newlines to <br> for HTML
+                translatedTextEditor.style.display = 'block';
                 
                 console.log('Translation completed successfully');
 
@@ -449,7 +458,7 @@ Please ensure the translation:
                 errorMessage = 'Erreur de connexion réseau.<br><small>Network connection error.</small>';
             }
 
-            aiOutput.innerHTML = `
+            aiPlaceholder.innerHTML = `
                 <div style="color: #d32f2f; text-align: center; padding: 20px;">
                     <i class="fas fa-exclamation-triangle"></i><br>
                     ${errorMessage}
@@ -529,12 +538,223 @@ Please ensure the translation:
         overlay.addEventListener('click', hideModal);
     }
 
+    // Add close handler for the new print modal
+    const printPreviewModal = document.getElementById('printPreviewModal');
+    if (printPreviewModal) {
+        printPreviewModal.querySelector('.close-modal').addEventListener('click', () => {
+            printPreviewModal.style.display = 'none';
+            if (overlay) overlay.style.display = 'none';
+        });
+    }
+
+    // Add print button handler
+    const printBtn = document.getElementById('printBtn');
+    if(printBtn) {
+        printBtn.addEventListener('click', () => {
+            const content = document.getElementById('translatedText')?.innerHTML; // Use translatedText content
+            if (!content) {
+                alert('No content to print');
+                return;
+            }
+    
+            const w = window.open('', '_blank');
+            w.document.write(`<html><head><style>@page{margin:1cm}body{margin:0;padding:1cm;font-family:Arial, sans-serif;line-height:1.6;}</style></head><body>${content}<script>onload=()=>print()</script></body></html>`);
+            w.document.close();
+        });
+    }
+
     // Add keyboard shortcut for modal
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             hideModal();
+            // Also hide the print confirmation modal if it's open
+            document.getElementById('printConfirmationModal').style.display = 'none';
         }
     });
 
     console.log('International Correspondence Support loaded successfully');
+
+    // Rich text editing functions (copied from document-translation.html)
+    function formatText(elementId, command, value = null) {
+        const element = document.getElementById(elementId);
+        element.focus();
+        
+        if (command === 'fontSize') {
+            document.execCommand('fontSize', false, '7');
+            const fontElements = element.querySelectorAll('font[size="7"]');
+            fontElements.forEach(fontElement => {
+                fontElement.removeAttribute('size');
+                fontElement.style.fontSize = value;
+            });
+        } else {
+            document.execCommand(command, false, value);
+        }
+        
+        updateToolbarState(elementId);
+    }
+    
+    function clearFormatting(elementId) {
+        const element = document.getElementById(elementId);
+        element.focus();
+        document.execCommand('removeFormat', false, null);
+        updateToolbarState(elementId);
+    }
+    
+    function copyText(elementId) {
+        const element = document.getElementById(elementId);
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        try {
+            document.execCommand('copy');
+            showNotification('Text copied to clipboard!', 'success');
+        } catch (err) {
+            showNotification('Failed to copy text', 'error');
+        }
+        
+        selection.removeAllRanges();
+    }
+    
+    function updateToolbarState(elementId) {
+        const toolbarId = 'translatedToolbar';
+        const toolbar = document.getElementById(toolbarId);
+        
+        if (!toolbar) return;
+
+        // Update button states based on current selection
+        const buttons = toolbar.querySelectorAll('.toolbar-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Check for bold, italic, underline
+        if (document.queryCommandState('bold')) {
+            toolbar.querySelector('[onclick*="bold"]')?.classList.add('active');
+        }
+        if (document.queryCommandState('italic')) {
+            toolbar.querySelector('[onclick*="italic"]')?.classList.add('active');
+        }
+        if (document.queryCommandState('underline')) {
+            toolbar.querySelector('[onclick*="underline"]')?.classList.add('active');
+        }
+    }
+
+    // Add event listeners for toolbar updates
+    const translatedTextElement = document.getElementById('translatedText');
+    if (translatedTextElement) {
+        translatedTextElement.addEventListener('keyup', () => updateToolbarState('translatedText'));
+        translatedTextElement.addEventListener('mouseup', () => updateToolbarState('translatedText'));
+    }
+
+    // Make functions globally available for inline onchange/onclick attributes
+    window.formatText = formatText;
+    window.clearFormatting = clearFormatting;
+    window.copyText = copyText;
+
+    // Modified prepareForPrint to use custom confirmation modal
+    function prepareForPrint() {
+        const printConfirmationModal = document.getElementById('printConfirmationModal');
+        const overlay = document.querySelector('.overlay');
+
+        if (printConfirmationModal && overlay) {
+            printConfirmationModal.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+    }
+    window.prepareForPrint = prepareForPrint;
+
+    // Event listeners for custom print confirmation modal
+    const printConfirmationModal = document.getElementById('printConfirmationModal');
+    const confirmPrintYesBtn = document.getElementById('confirmPrintYes');
+    const confirmPrintNoBtn = document.getElementById('confirmPrintNo');
+
+    if (printConfirmationModal && confirmPrintYesBtn && confirmPrintNoBtn) {
+        confirmPrintYesBtn.addEventListener('click', () => {
+            printConfirmationModal.style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+            // Trigger the actual print process
+            const contentToPrint = document.getElementById('translatedText')?.innerHTML;
+            if (contentToPrint) {
+                const w = window.open('', '_blank');
+                w.document.write(`
+                    <html>
+                        <head>
+                            <title>Print</title>
+                            <style>
+                                @page { margin: 1cm; size: A4; }
+                                body { 
+                                    font-family: 'Times New Roman', Times, serif; 
+                                    font-size: 12pt;
+                                    line-height: 1.5;
+                                }
+                                /* Preserve text alignment from the editor */
+                                [style*="text-align: center"] { text-align: center !important; }
+                                [style*="text-align: right"] { text-align: right !important; }
+                                [style*="text-align: left"] { text-align: left !important; }
+                            </style>
+                        </head>
+                        <body>
+                            ${contentToPrint}
+                            <script>
+                                window.onload = function() {
+                                    window.print();
+                                    window.close();
+                                }
+                            </script>
+                        </body>
+                    </html>
+                `);
+                w.document.close();
+            } else {
+                showNotification('No content to print', 'error');
+            }
+        });
+
+        confirmPrintNoBtn.addEventListener('click', () => {
+            printConfirmationModal.style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+        });
+
+        // Close button for the confirmation modal
+        printConfirmationModal.querySelector('.close-modal').addEventListener('click', () => {
+            printConfirmationModal.style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+        });
+    }
+
+    // Add notification function (if not already defined)
+    function showNotification(message, type = 'success') {
+        const existingNotification = document.querySelector('.notification-toast');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        const notification = document.createElement('div');
+        notification.className = `notification-toast ${type}`;
+        notification.innerHTML = `
+            <i class="icon fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+            <span class="message">${message}</span>
+            <button class="close">&times;</button>
+        `;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+
+        notification.querySelector('.close').addEventListener('click', () => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        });
+
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 3000);
+    }
 });

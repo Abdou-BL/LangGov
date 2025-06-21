@@ -1923,3 +1923,96 @@ html {
     border-color: #ff4444 !important;
     background-color: #fff2f2 !important;
 }
+
+/* New styles for print confirmation modal */
+.modal.print-confirm-modal {
+    background-color:inherit;
+    backdrop-filter: blur(5px);
+    height: 230px;
+    width: 380px;
+    
+}
+
+.print-confirm-modal .modal-content {
+    padding: 30px;
+    border-radius: 15px;
+    width: 380px; /* Smaller width for a confirmation dialog */
+    max-width: 90%;
+    text-align: center;
+    background: linear-gradient(145deg, var(--light-beige) 0%, var(--beige) 100%);
+    border: 2px solid var(--primary-green);
+    box-shadow: 0 10px 30px rgba(45, 90, 61, 0.2);
+}
+
+.print-confirm-modal .modal-title-confirm {
+    color: var(--primary-green);
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+.print-confirm-modal .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.print-confirm-modal .btn-confirm-yes,
+.print-confirm-modal .btn-confirm-no {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1; /* Make buttons take equal space */
+    max-width: 120px;
+}
+
+.print-confirm-modal .btn-confirm-yes {
+    background: var(--primary-green);
+    color: white;
+    box-shadow: 0 4px 10px rgba(45, 90, 61, 0.2);
+}
+
+.print-confirm-modal .btn-confirm-yes:hover {
+    background: var(--secondary-green);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(45, 90, 61, 0.3);
+}
+
+.print-confirm-modal .btn-confirm-no {
+    background: var(--white);
+    color: var(--primary-green);
+    border: 2px solid var(--primary-green);
+}
+
+.print-confirm-modal .btn-confirm-no:hover {
+    background: var(--light-green);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(45, 90, 61, 0.1);
+}
+
+.print-confirm-modal .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--text-medium);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.print-confirm-modal .close-modal:hover {
+    color: #ff4444;
+    transform: rotate(90deg);
+}
